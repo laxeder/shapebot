@@ -1,0 +1,38 @@
+FROM node:20-buster
+
+## Configurando variáveis de Ambiente
+ENV APP_HOME=/build
+
+## Diretorio de trabalho
+WORKDIR "$APP_HOME"
+
+LABEL description="spbt-dev"
+
+LABEL org.opencontainers.image.name="spbt-dev"
+LABEL org.opencontainers.image.authors="laxederbr@gmail.com"
+LABEL org.opencontainers.image.hostname="spbt-dev"
+
+LABEL com.docker.volume.name='spbt-dev'
+LABEL com.docker.network.bridge.name='spbt-dev'
+
+## Atualizando pacotes
+RUN apt update && apt upgrade -y
+RUN apt install npm -y
+
+## Arquivos de iniciacao para o node
+COPY package*.json ./
+
+## Instalando depedencias
+RUN npm install
+
+## Copia projeto
+COPY ./ ./
+
+## porta de acesso
+EXPOSE 9002
+
+## diretorio padrao
+VOLUME "$APP_HOME"
+
+## start do ambiente
+CMD ["npm", "run", "dev"]
