@@ -36,16 +36,3 @@ services:
       - 8082:8082
     depends_on:
       - "spbt-redis"
-
-  spbt-redis:
-    image: spbt-redis
-    hostname: spbt-redis
-    container_name: spbt-redis
-    build:
-      context: ./
-      dockerfile: dockerfiles/Dockerfile.redis
-    volumes:
-      - ./data/redis:/data
-    restart: always
-    ports:
-      - 6382:6382
