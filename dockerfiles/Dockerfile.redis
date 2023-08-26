@@ -1,0 +1,14 @@
+# Usando a imagem base oficial do Redis
+FROM redis:latest
+
+# Copie um arquivo de configuração personalizado
+COPY redis.conf /usr/local/etc/redis/redis.conf
+
+# Copie o diretório de dados do Redis para o contêiner
+COPY ./data/redis /data
+
+# Exponha a porta do Redis
+EXPOSE 6382
+
+# Comando a ser executado ao iniciar o contêiner
+CMD ["redis-server", "/usr/local/etc/redis/redis.conf"]
