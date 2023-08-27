@@ -6,7 +6,7 @@ import TextUtils from "@utils/TextUtils";
 /**
  * Uma classe utilitária que contém métodos para interações com usuários através de mensagens.
  */
-export default class BotUtils {
+export default class UserUtils {
   /**
    * Aguarda até que um usuário envie uma mensagem em um determinado chat.
    * @param botId - O ID do bot.
@@ -22,15 +22,15 @@ export default class BotUtils {
     });
 
     if (msg.apiSend || msg.isDeleted) {
-      return await BotUtils.awaitUserSendMessage(botId, chatId);
+      return await UserUtils.awaitUserSendMessage(botId, chatId);
     }
 
     if (isReactionMessage(msg)) {
-      return await BotUtils.awaitUserSendMessage(botId, chatId);
+      return await UserUtils.awaitUserSendMessage(botId, chatId);
     }
 
     if (isPollMessage(msg)) {
-      return BotUtils.awaitUserSendMessage(botId, chatId);
+      return UserUtils.awaitUserSendMessage(botId, chatId);
     }
 
     return msg;
@@ -44,7 +44,7 @@ export default class BotUtils {
    * @returns `true` se o usuário confirmou, `false` se o usuário negou e `null` se a confirmação foi cancelada.
    */
   public static async awaitUserSendConfirmation(botId: string, chatId: string, text?: string): Promise<boolean | null> {
-    const msg = await BotUtils.awaitUserSendMessage(botId, chatId);
+    const msg = await UserUtils.awaitUserSendMessage(botId, chatId);
 
     const confirm = msg.text.trim().toLowerCase().split(/\s+/)[0];
 
@@ -58,7 +58,7 @@ export default class BotUtils {
 
     await client.sendMessage(chatId, text || "Favor digite *sim* ou *não* para continuar.");
 
-    return await BotUtils.awaitUserSendConfirmation(botId, chatId, text);
+    return await UserUtils.awaitUserSendConfirmation(botId, chatId, text);
   }
 
   /**
@@ -69,7 +69,7 @@ export default class BotUtils {
    * @returns O índice da opção selecionada ou `null` se cancelado.
    */
   public static async awaitUserSendOption(botId: string, chatId: string, list: Array<string | number>): Promise<number | null> {
-    const msg = await BotUtils.awaitUserSendMessage(botId, chatId);
+    const msg = await UserUtils.awaitUserSendMessage(botId, chatId);
 
     if (msg.text.trim().toLowerCase().startsWith("cancel")) return null;
     if (msg.text.trim().toLowerCase().startsWith("sair")) return null;
@@ -97,7 +97,7 @@ export default class BotUtils {
 
       await client.sendMessage(chatId, "Favor digite o número de uma das opções:");
 
-      return await BotUtils.awaitUserSendOption(botId, chatId, list);
+      return await UserUtils.awaitUserSendOption(botId, chatId, list);
     }
 
     return Number(option.toFixed(0)) - 1;
@@ -110,7 +110,7 @@ export default class BotUtils {
    * @returns A mensagem de texto enviada pelo usuário ou `null` se cancelado.
    */
   public static async awaitUserSendText(botId: string, chatId: string): Promise<string | null> {
-    const msg = await BotUtils.awaitUserSendMessage(botId, chatId);
+    const msg = await UserUtils.awaitUserSendMessage(botId, chatId);
 
     if (msg.text.trim().toLowerCase().startsWith("cancelar")) return null;
     if (msg.text.trim().toLowerCase().startsWith("sair")) return null;
@@ -120,7 +120,7 @@ export default class BotUtils {
 
       await client.sendMessage(chatId, "Favor mande-me uma mensagem em texto:");
 
-      return await BotUtils.awaitUserSendText(botId, chatId);
+      return await UserUtils.awaitUserSendText(botId, chatId);
     }
 
     return msg.text.trim();
@@ -134,7 +134,7 @@ export default class BotUtils {
    * @returns O número enviado pelo usuário ou `null` se cancelado.
    */
   public static async awaitUserSendNumber(botId: string, chatId: string, allNumbers: boolean = false): Promise<number | null> {
-    const msg = await BotUtils.awaitUserSendMessage(botId, chatId);
+    const msg = await UserUtils.awaitUserSendMessage(botId, chatId);
 
     if (msg.text.trim().toLowerCase().startsWith("cancelar")) return null;
     if (msg.text.trim().toLowerCase().startsWith("sair")) return null;
@@ -146,7 +146,7 @@ export default class BotUtils {
 
       await client.sendMessage(chatId, "Favor digite um número:");
 
-      return await BotUtils.awaitUserSendNumber(botId, chatId);
+      return await UserUtils.awaitUserSendNumber(botId, chatId);
     }
 
     return number;
@@ -159,7 +159,7 @@ export default class BotUtils {
    * @returns O número de telefone enviado pelo usuário ou `null` se cancelado.
    */
   public static async awaitUserSendPhoneNumber(botId: string, chatId: string): Promise<string | null> {
-    const msg = await BotUtils.awaitUserSendMessage(botId, chatId);
+    const msg = await UserUtils.awaitUserSendMessage(botId, chatId);
 
     if (msg.text.trim().toLowerCase().startsWith("cancelar")) return null;
     if (msg.text.trim().toLowerCase().startsWith("sair")) return null;
@@ -171,7 +171,7 @@ export default class BotUtils {
 
       await client.sendMessage(chatId, "Número inválido! Favor digite um número válido:");
 
-      return await BotUtils.awaitUserSendPhoneNumber(botId, chatId);
+      return await UserUtils.awaitUserSendPhoneNumber(botId, chatId);
     }
 
     return userId;
@@ -184,7 +184,7 @@ export default class BotUtils {
    * @returns O valor monetário enviado pelo usuário ou `null` se cancelado.
    */
   public static async awaitUserSendMoneyValue(botId: string, chatId: string): Promise<number | null> {
-    const msg = await BotUtils.awaitUserSendMessage(botId, chatId);
+    const msg = await UserUtils.awaitUserSendMessage(botId, chatId);
 
     if (msg.text.trim().toLowerCase().startsWith("cancelar")) return null;
     if (msg.text.trim().toLowerCase().startsWith("sair")) return null;
@@ -196,7 +196,7 @@ export default class BotUtils {
 
       await client.sendMessage(chatId, "O valor está incorreto! tente novamente:");
 
-      return await BotUtils.awaitUserSendMoneyValue(botId, chatId);
+      return await UserUtils.awaitUserSendMoneyValue(botId, chatId);
     }
 
     if (price <= 0) {
@@ -204,7 +204,7 @@ export default class BotUtils {
 
       await client.sendMessage(chatId, "O valor precisa ser 1 centavo ou maior, tente novamente:");
 
-      return await BotUtils.awaitUserSendMoneyValue(botId, chatId);
+      return await UserUtils.awaitUserSendMoneyValue(botId, chatId);
     }
 
     return price;
