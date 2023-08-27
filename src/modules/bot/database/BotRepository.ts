@@ -43,17 +43,17 @@ export default class BotRepository implements DataRepository<Bot> {
       throw new ClientError("Bot id not declared", "Não foi possível atualizar os dados do bot");
     }
 
-    const data = await this.db.get("/bots", bot.id);
+    const botData = await this.db.get("/bots", bot.id);
 
-    if (data.status != DataStatus.Enabled) {
+    if (botData.status != DataStatus.Enabled) {
       throw new ClientError(`Not allowed to update bot "${bot.id}"`, "Não foi possível atualizar os dados do bot");
     }
 
-    DataModel.inject(data, bot);
+    DataModel.inject(botData, bot);
 
-    data.updatedAt = DateUtils.ISO();
+    botData.updatedAt = DateUtils.ISO();
 
-    await this.db.save("/bots", data);
+    await this.db.save("/bots", botData);
   }
 
   /**
@@ -67,9 +67,9 @@ export default class BotRepository implements DataRepository<Bot> {
       throw new ClientError("Bot id not declared", "Não foi possível ler os dados do bot");
     }
 
-    const data = await this.db.get("/bots", bot.id);
+    const botData = await this.db.get("/bots", bot.id);
 
-    return new Bot(data);
+    return new Bot(botData);
   }
 
   /**
@@ -78,16 +78,16 @@ export default class BotRepository implements DataRepository<Bot> {
    * @throws ClientError se o bot não estiver habilitado ou em caso de erro.
    */
   public async delete(bot: Bot): Promise<void> {
-    const data = await this.read(bot);
+    const botData = await this.read(bot);
 
-    if (data.status != DataStatus.Enabled) {
+    if (botData.status != DataStatus.Enabled) {
       throw new ClientError(`Bot "${bot.id}" has already been deleted`, "Os dados do bot já foram deletados");
     }
 
-    data.status = DataStatus.Disabled;
-    data.updatedAt = DateUtils.ISO();
+    botData.status = DataStatus.Disabled;
+    botData.updatedAt = DateUtils.ISO();
 
-    await this.db.save("/bots", data);
+    await this.db.save("/bots", botData);
   }
 
   /**
@@ -96,16 +96,16 @@ export default class BotRepository implements DataRepository<Bot> {
    * @throws ClientError se o bot não estiver desabilitado ou em caso de erro.
    */
   public async restore(bot: Bot): Promise<void> {
-    const data = await this.read(bot);
+    const botData = await this.read(bot);
 
-    if (data.status != DataStatus.Disabled) {
+    if (botData.status != DataStatus.Disabled) {
       throw new ClientError(`Bot "${bot.id}" has already been restored`, "Os dados do bot já foram restaurados");
     }
 
-    data.status = DataStatus.Enabled;
-    data.updatedAt = DateUtils.ISO();
+    botData.status = DataStatus.Enabled;
+    botData.updatedAt = DateUtils.ISO();
 
-    await this.db.save("/bots", data);
+    await this.db.save("/bots", botData);
   }
 
   /**
@@ -115,6 +115,6 @@ export default class BotRepository implements DataRepository<Bot> {
   public async findAll(): Promise<Bot[]> {
     const list = await this.db.findAll("/bots");
 
-    return list.map((data) => new Bot(data));
+    return list.map((botData) => new Bot(botData));
   }
 }
