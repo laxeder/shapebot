@@ -96,9 +96,9 @@ export default class BotController {
   /**
    * Inicia um bot.
    * @param botId - O ID do bot a ser iniciado.
-   * @param db - A instância da base de dados.
+   * @param auth - Método de auntenticação do bot.
    */
-  public static async startBot(botId: string, db: Database) {
+  public static async startBot(botId: string, auth: IAuth) {
     //! ===== Configurando bot ===== !\\
 
     const client = new Client(new WhatsAppBot(getBaileysConfig()), {
@@ -127,8 +127,6 @@ export default class BotController {
 
     //! ===== Conectando bot ===== !\\
 
-    const botAuth = new BotAuth(botId, db);
-
-    await client.connect(botAuth);
+    await client.connect(auth);
   }
 }
