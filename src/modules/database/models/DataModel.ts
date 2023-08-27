@@ -5,10 +5,10 @@ import IDataModel from "@modules/database/interfaces/DataModel";
  * Classe base para modelos de dados comuns.
  */
 export default class DataModel implements IDataModel {
-  id: string = "";
-  status: DataStatus = DataStatus.Disabled;
-  createdAt: string = "";
-  updatedAt: string = "";
+  public id: string = "";
+  public status: DataStatus = DataStatus.Disabled;
+  public createdAt: string = "";
+  public updatedAt: string = "";
 
   /**
    * Substitui as propriedades dos dados existente por novos dados.
