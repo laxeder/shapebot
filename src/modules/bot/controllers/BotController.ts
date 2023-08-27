@@ -11,6 +11,8 @@ import CommandController from "@modules/command/CommandController";
 import { DataStatus } from "@modules/database/shared/DataStatus";
 import Bot from "@modules/bot/models/Bot";
 
+import Logger from "@shared/Logger";
+
 export default class BotController {
   constructor(private repo: DataRepository<Bot>) {}
 
@@ -97,6 +99,8 @@ export default class BotController {
    * @param auth - Método de auntenticação do bot.
    */
   public static async startBot(botId: string, auth: IAuth) {
+    Logger.info(`Iniciando bot "${botId}"..`);
+
     //! ===== Configurando bot ===== !\\
 
     const client = new Client(new WhatsAppBot(getBaileysConfig()), {
@@ -126,5 +130,7 @@ export default class BotController {
     //! ===== Conectando bot ===== !\\
 
     await client.connect(auth);
+
+    Logger.info(`Bot "${botId}" foi conectado com sucesso!`);
   }
 }
