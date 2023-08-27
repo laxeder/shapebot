@@ -1,5 +1,5 @@
 import DataRepository from "@modules/database/interfaces/DataRepository";
-import { DataStatus } from "@modules/database/models/DataStatus";
+import { DataStatus } from "@modules/database/shared/DataStatus";
 import User from "@modules/user/models/User";
 
 export default class UserController {

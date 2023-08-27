@@ -1,5 +1,5 @@
 import DataRepository from "@modules/database/interfaces/DataRepository";
-import { DataStatus } from "@modules/database/models/DataStatus";
+import { DataStatus } from "@modules/database/shared/DataStatus";
 import Database from "@modules/database/interfaces/Database";
 import DataModel from "@modules/database/models/DataModel";
 import ClientError from "@modules/error/models/ClientError";
