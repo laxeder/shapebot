@@ -42,9 +42,10 @@ export default class BotController {
   public async getBotById(id: string): Promise<Bot> {
     const bot = await this.repo.read(new Bot({ id }));
 
-    // Adiciona o ID do bot à lista de administradores, se ainda não estiver presente
+    // Adiciona o ID do bot acaso dados chegem vazios
     bot.id = id;
 
+    // Adiciona o ID do bot à lista de administradores, se ainda não estiver presente
     if (!bot.admins.includes(bot.id)) {
       bot.admins.push(bot.id);
     }
