@@ -17,6 +17,7 @@
   "author": "laxeder",
   "license": "MIT",
   "dependencies": {
+    "croxydb": "^0.0.5",
     "dotenv": "16.3.1",
     "hex-generator": "1.0.1",
     "rimraf": "5.0.1",
