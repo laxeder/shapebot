@@ -1,0 +1,29 @@
+{
+  "name": "spbt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "export NODE_ENV=production && node dist/app.js",
+    "prod": "export NODE_ENV=production && ts-node -r tsconfig-paths/register app.ts --prod",
+    "stage": "export NODE_ENV=production && ts-node -r tsconfig-paths/register app.ts --prod",
+    "dev": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register app.ts --dev",
+    "generate": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register generateBot.ts --dev",
+    "backupAndRestore": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register backup.ts --dev",
+    "build": "npm run clean && tsc && tsc-alias",
+    "clean": "rimraf dist"
+  },
+  "keywords": [],
+  "author": "laxeder",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "16.3.1",
+    "hex-generator": "1.0.1",
+    "rimraf": "5.0.1",
+    "rompot": "1.6.5",
+    "ts-node-dev": "2.0.0",
+    "tsc-alias": "1.8.6",
+    "tsconfig-paths": "4.2.0",
+    "winston": "3.9.0"
+  }
+}
