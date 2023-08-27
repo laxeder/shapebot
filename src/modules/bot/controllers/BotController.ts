@@ -1,4 +1,4 @@
-import Client, { Command, WhatsAppBot } from "rompot";
+import Client, { Command, IAuth, WhatsAppBot } from "rompot";
 
 import { getBaileysConfig } from "@configs/WAConfig";
 
@@ -8,9 +8,7 @@ import error from "@events/error";
 
 import DataRepository from "@modules/database/interfaces/DataRepository";
 import CommandController from "@modules/command/CommandController";
-import { DataStatus } from "@modules/database/models/DataStatus";
-import Database from "@modules/database/interfaces/Database";
-import BotAuth from "@modules/bot/models/BotAuth";
+import { DataStatus } from "@modules/database/shared/DataStatus";
 import Bot from "@modules/bot/models/Bot";
 
 export default class BotController {
