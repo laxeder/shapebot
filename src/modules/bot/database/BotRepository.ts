@@ -15,6 +15,12 @@ export default class BotRepository implements DataRepository<Bot> {
       throw new ClientError("Bot id not declared", "Não foi possível salvar os dados do bot");
     }
 
+    const botData = await this.db.get("/bots", bot.id);
+
+    if (botData.status == DataStatus.Enabled) {
+      throw new ClientError(`bot "${bot.id}" already exists`, "Um bot com esse número já existe em nosso sistema");
+    }
+
     bot.status = DataStatus.Enabled;
     bot.createdAt = DateUtils.ISO();
     bot.updatedAt = DateUtils.ISO();
@@ -79,14 +85,6 @@ export default class BotRepository implements DataRepository<Bot> {
   public async findAll(): Promise<Bot[]> {
     const list = await this.db.findAll("/bots");
 
-    const bots: Bot[] = [];
-
-    for (const data of list) {
-      if (data.status != DataStatus.Enabled) continue;
-
-      bots.push(new Bot(data));
-    }
-
-    return bots;
+    return list.map((data) => new Bot(data));
   }
 }
