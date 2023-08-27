@@ -17,6 +17,7 @@
   "author": "laxeder",
   "license": "MIT",
   "dependencies": {
+    "@types/uuid": "9.0.2",
     "croxydb": "^0.0.5",
     "dotenv": "16.3.1",
     "hex-generator": "1.0.1",
@@ -25,6 +26,7 @@
     "ts-node-dev": "2.0.0",
     "tsc-alias": "1.8.6",
     "tsconfig-paths": "4.2.0",
+    "uuid": "9.0.0",
     "winston": "3.9.0"
   }
 }
