@@ -3,6 +3,7 @@ import winston from "winston";
 
 import { getEnvironment } from "@configs/environments";
 
+import RepositoryUtils from "@modules/database/utils/RepositoryUtils";
 import BotController from "@modules/bot/controllers/BotController";
 import ErrorUtils from "@modules/error/utils/ErrorUtils";
 
@@ -53,7 +54,9 @@ export default class Logger {
       if (client.status !== "online") return;
       if (!text) return;
 
-      const bots = await BotController.getAllBots();
+      const botController = new BotController(RepositoryUtils.getBotRepository());
+
+      const bots = await botController.listAllBots();
 
       //? Obtem o primeiro bot da lista
       const bot = bots[0];
