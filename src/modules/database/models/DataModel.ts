@@ -18,7 +18,7 @@ export default class DataModel implements IDataModel {
    * @returns Os dados existente com as propriedades atualizadas.
    */
   public static inject<T extends DataModel>(oldData: T, newData: Partial<DataModel>, force: boolean = false): T {
-    if (!oldData || oldData == null || typeof oldData != "object") {
+    if (!oldData || oldData == null || typeof oldData != "object" || !newData || newData == null || typeof newData != "object") {
       return new DataModel() as T;
     }
 
