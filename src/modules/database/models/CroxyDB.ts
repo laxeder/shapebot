@@ -40,7 +40,7 @@ export default class CroxyDB implements Database {
   public async save(key: string, data: DataModel): Promise<void> {
     key = this.formateKey(key);
 
-    await this.db.set(this.formateKey(key), data);
+    await this.db.set(this.formateKey(key, data.id), data);
   }
 
   public async remove(key: string, id: string): Promise<void> {
