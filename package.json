@@ -9,7 +9,6 @@
     "stage": "export NODE_ENV=production && ts-node -r tsconfig-paths/register app.ts --prod",
     "dev": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register app.ts --dev",
     "generate": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register generateBot.ts --dev",
-    "backupAndRestore": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register backup.ts --dev",
     "build": "npm run clean && tsc && tsc-alias",
     "clean": "rimraf dist"
   },
