@@ -8,6 +8,7 @@ import ICommandData from "@modules/command/interfaces/ICommandData";
 
 export default class Command<T extends ICommandData> extends rompot.Command {
   public id: string = "";
+  public avaible: rompot.ChatType[] = ["pv"]
   public functions: CommandFunction<T>[] = [];
   public data: T;
 
