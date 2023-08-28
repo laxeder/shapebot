@@ -1,11 +1,10 @@
-import type { CMDRunType, MarshalArg, MarshalCommand } from "./CommandTypes";
-import { CMDRun } from "./CommandEnums";
+import type { CMDRunType, MarshalArg, MarshalCommand } from "@modules/command/types/CommandTypes";
+import { CMDRun } from "@modules/command/models/CommandRun";
+import Command from "@modules/command/models/Command";
 
-import Command from "./Command";
-
-export namespace MarshalCMD {
+export default class MarshalCMD {
   /** * Obtem um protocolo de comando */
-  export function getMarshalCommand(command: string | Command, type: CMDRunType = CMDRun.Reply, ...args: MarshalArg[]): MarshalCommand {
+  public static getMarshalCommand(command: string | Command<any>, type: CMDRunType = CMDRun.Reply, ...args: MarshalArg[]): MarshalCommand {
     const cmdName = command instanceof Command ? command.id : command;
     const id = command instanceof Command ? `${command.id}` : undefined;
 
@@ -13,12 +12,12 @@ export namespace MarshalCMD {
   }
 
   /** * Cria um protocolo de ID */
-  export function MarshalID(command: string | Command, type: CMDRunType = CMDRun.Reply, ...args: MarshalArg[]): string {
-    return JSON.stringify(getMarshalCommand(command, type, ...args));
+  public static MarshalID(command: string | Command<any>, type: CMDRunType = CMDRun.Reply, ...args: MarshalArg[]): string {
+    return JSON.stringify(MarshalCMD.getMarshalCommand(command, type, ...args));
   }
 
   /** * Restaura um ID */
-  export function UnmarshalID(id: string, type: CMDRunType = CMDRun.Reply, ignorePrefix: boolean = false): MarshalCommand {
+  public static UnmarshalID(id: string, type: CMDRunType = CMDRun.Reply, ignorePrefix: boolean = false): MarshalCommand {
     const defaultJson: MarshalCommand = { isValid: false, name: id, type, ignorePrefix, args: [] };
 
     try {
@@ -37,7 +36,7 @@ export namespace MarshalCMD {
   }
 
   /** * Obtem o protocolo de um comando */
-  export function get(cmd: string | Command | MarshalCommand, defaultType: CMDRun = CMDRun.Exec): MarshalCommand {
+  public static get(cmd: string | Command<any> | MarshalCommand, defaultType: CMDRun = CMDRun.Exec): MarshalCommand {
     if (cmd instanceof Command) {
       const marshal = MarshalCMD.get(MarshalCMD.gen(cmd, defaultType));
 
@@ -47,7 +46,7 @@ export namespace MarshalCMD {
     }
 
     if (typeof cmd === "string") {
-      const marshal = UnmarshalID(cmd);
+      const marshal = MarshalCMD.UnmarshalID(cmd);
 
       if (!marshal.isValid) {
         marshal.id = cmd;
@@ -65,23 +64,23 @@ export namespace MarshalCMD {
   }
 
   /** * Obtem o protocolo de execução de um comando */
-  export function getExec(text: string) {
+  public static getExec(text: string) {
     return MarshalCMD.get(text, CMDRun.Exec);
   }
 
   /** * Obtem o protocolo de resposta de um comando */
-  export function getReply(text: string) {
+  public static getReply(text: string) {
     return MarshalCMD.get(text, CMDRun.Reply);
   }
 
   /** * Gera o protocolo de um comando em JSON */
-  export function genJSON(cmd: string | Command | MarshalCommand, defaultType: CMDRun = CMDRun.Exec, ...args: MarshalArg[]): MarshalCommand {
+  public static genJSON(cmd: string | Command<any> | MarshalCommand, defaultType: CMDRun = CMDRun.Exec, ...args: MarshalArg[]): MarshalCommand {
     if (cmd instanceof Command) {
       return MarshalCMD.genJSON(cmd.id, defaultType, ...args);
     }
 
     if (typeof cmd === "string") {
-      let marshal = UnmarshalID(cmd, defaultType);
+      let marshal = MarshalCMD.UnmarshalID(cmd, defaultType);
 
       if (!marshal.isValid) {
         marshal.id = cmd;
@@ -102,17 +101,17 @@ export namespace MarshalCMD {
   }
 
   /** * Gera o protocolo de um comando */
-  export function gen(cmd: string | Command | MarshalCommand, defaultType: CMDRun = CMDRun.Exec, ...args: MarshalArg[]): string {
+  public static gen(cmd: string | Command<any> | MarshalCommand, defaultType: CMDRun = CMDRun.Exec, ...args: MarshalArg[]): string {
     return JSON.stringify(MarshalCMD.genJSON(cmd, defaultType, ...args));
   }
 
   /** * Gera o protocolo de execução de um comando */
-  export function genExec(cmd: string | Command | MarshalCommand, ...args: MarshalArg[]): string {
+  public static genExec(cmd: string | Command<any> | MarshalCommand, ...args: MarshalArg[]): string {
     return MarshalCMD.gen(cmd, CMDRun.Exec, ...args);
   }
 
   /** * Gera o protocolo de resposta de um comando */
-  export function genReply(cmd: string | Command | MarshalCommand, ...args: MarshalArg[]): string {
+  public static genReply(cmd: string | Command<any> | MarshalCommand, ...args: MarshalArg[]): string {
     return MarshalCMD.gen(cmd, CMDRun.Reply, ...args);
   }
 }
