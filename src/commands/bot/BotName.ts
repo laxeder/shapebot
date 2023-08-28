@@ -1,38 +1,49 @@
-import { CMDKey, IMessage } from "rompot";
+import { CMDKey } from "rompot";
 
+import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
+import RepositoryUtils from "@modules/database/utils/RepositoryUtils";
 import BotController from "@modules/bot/controllers/BotController";
-import Command from "@modules/command";
+import Command from "@modules/command/models/Command";
 
 import { Requeriments } from "@shared/Requeriments";
-import UserUtils from "@modules/user/utils/UserUtils";
-import RepositoryUtils from "@modules/database/utils/RepositoryUtils";
 
-export class ChangeBotNameCommand extends Command {
-  public onRead() {
-    this.id = "change-bot-name";
-    this.keys = [CMDKey("alter", "nome", "bot")];
-    this.requeriments = [Requeriments.BotAdmin];
-  }
+//! ===== Configurando comando =====
 
-  public async onExec(message: IMessage): Promise<void> {
-    try {
-      await this.client.sendMessage(message.chat.id, "*Alterar nome do bot*\n\n_Me mande o novo nome do bot._");
+const data = CommandDataUtils.generateEmpty({ name: "" });
+const cmd = new Command(data);
 
-      const botController = new BotController(RepositoryUtils.getBotRepository());
+cmd.id = "change-bot-name";
+cmd.permissions = [Requeriments.BotAdmin];
+cmd.keys = [CMDKey("alter", "nome", "bot"), CMDKey("defin", "nome", "bot")];
 
-      const name = await UserUtils.awaitUserSendText(this.clientId, message.chat.id);
+//! ===== Etapa 1: Inicialização =====
 
-      if (name == null) {
-        await this.client.sendMessage(message.chat.id, "A alteração do nome do bot foi cancelada! ❌");
+cmd.addFunc(async (data, next) => {
+  await cmd.client.sendMessage(cmd.chatId, "Mande-me o novo nome do bot:");
 
-        return;
-      }
+  return next();
+});
 
-      await botController.updateBot({ id: this.clientId, name });
+//! ===== Etapa 2: Obtendo novo nome =====
 
-      await this.client.sendMessage(message.chat.id, "O nome do bot foi alterado com sucesso! ✅");
-    } catch (err) {
-      this.onError(message, err);
-    }
-  }
-}
+cmd.addFunc(
+  cmd.waitForText(async (data, name, next, restart) => {
+    data.name = name;
+
+    return next(data);
+  })
+);
+
+//! ===== Etapa 3: Salvando novo nome =====
+
+cmd.addFunc(async (data) => {
+  const botController = new BotController(RepositoryUtils.getBotRepository());
+
+  await botController.updateBot({ id: cmd.clientId, name: data.name });
+
+  await cmd.client.sendMessage(cmd.chatId, "O nome do bot foi alterado com sucesso! ✅");
+
+  return cmd.stop();
+});
+
+export default [cmd];
