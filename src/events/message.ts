@@ -1,6 +1,8 @@
 import { IClient, ButtonMessage, ListMessage, ReactionMessage, PollUpdateMessage, PollMessage, IMessage } from "rompot";
 
-import Command, { CMDRun, MarshalCMD } from "@modules/command";
+import MarshalCMD from "@modules/command/models/MarshalCMD";
+import { CMDRun } from "@modules/command/models/CommandRun";
+import Command from "@modules/command/models/Command";
 
 import Logger from "@shared/Logger";
 

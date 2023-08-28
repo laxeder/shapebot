@@ -6,8 +6,8 @@ import connection from "@events/connection";
 import message from "@events/message";
 import error from "@events/error";
 
+import CommandController from "@modules/command/controllers/CommandController";
 import DataRepository from "@modules/database/interfaces/DataRepository";
-import CommandController from "@modules/command/CommandController";
 import { DataStatus } from "@modules/database/shared/DataStatus";
 import Bot from "@modules/bot/models/Bot";
 
