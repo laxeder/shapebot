@@ -1,4 +1,5 @@
 import type { CommandFunction } from "@modules/command/types/CommandFunction";
+import type { CommandRestart } from "@modules/command/types/CommandRestart";
 import type { CommandNext } from "@modules/command/types/CommandNext";
 
 import * as rompot from "rompot";
@@ -48,7 +49,7 @@ export default class Command<T extends ICommandData> extends rompot.Command {
   public async initFunction(fn: ReturnType<CommandNext<T>>): Promise<void> {
     if (fn == null) return;
 
-    return this.initFunction(await fn(this.data, this.next));
+    return this.initFunction(await fn(this.data, this.next, this.restart));
   }
 
   public next(updatedData: T = this.data, index: number = this.data.currentFunctionIndex + 1): ReturnType<CommandNext<T>> {
@@ -60,6 +61,10 @@ export default class Command<T extends ICommandData> extends rompot.Command {
     return this.getFunction(index);
   }
 
+  public restart(index: number = this.data.currentFunctionIndex) {
+    return this.getFunction(index);
+  }
+
   public stop(): null {
     this.data.running = false;
 
@@ -68,62 +73,62 @@ export default class Command<T extends ICommandData> extends rompot.Command {
     return null;
   }
 
-  public waitForMessage(fn: (data: T, message: rompot.IMessage, next: CommandNext<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
-    return async (data: T, next: CommandNext<T>) => {
+  public waitForMessage(fn: (data: T, message: rompot.IMessage, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
+    return async (data: T, next: CommandNext<T>, restart: CommandRestart<T>) => {
       const waitForMessageConfig = { stopRead: true, ignoreMessageFromMe: false };
 
       const lastMessage = await this.client.awaitMessage(data.lastMessage.chat.id, waitForMessageConfig);
 
-      return await fn(data, lastMessage, next);
+      return await fn(data, lastMessage, next, restart);
     };
   }
 
-  public waitForText(fn: (data: T, text: string, next: CommandNext<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
-    return this.waitForMessage(async (data: T, message: rompot.IMessage, next: CommandNext<T>) => {
+  public waitForText(fn: (data: T, text: string, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
+    return this.waitForMessage(async (data: T, message: rompot.IMessage, next: CommandNext<T>, restart: CommandRestart<T>) => {
       if (!message.text) {
         await this.client.sendMessage(data.lastMessage.chat.id, "Favor digite um texto válido:");
 
-        return await this.waitForText(fn);
+        return this.waitForText(fn)(data, next, restart);
       }
 
-      return await fn(data, message.text, next);
+      return await fn(data, message.text, next, restart);
     });
   }
 
-  public waitForNumber(fn: (data: T, number: number, next: CommandNext<T>) => ReturnType<CommandFunction<T>>, allNumbers: boolean = false): CommandFunction<T> {
-    return this.waitForText(async (data: T, text: string, next: CommandNext<T>) => {
+  public waitForNumber(fn: (data: T, number: number, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandFunction<T>>, allNumbers: boolean = false): CommandFunction<T> {
+    return this.waitForText(async (data: T, text: string, next: CommandNext<T>, restart: CommandRestart<T>) => {
       const num = Number(text.replace(/\D+/g, ""));
 
       if (Number.isNaN(num)) {
         await this.client.sendMessage(data.lastMessage.chat.id, "Favor digite um número válido:");
 
-        return await this.waitForNumber(fn);
+        return this.waitForNumber(fn)(data, next, restart);
       }
 
       if (allNumbers && num < 0) {
         await this.client.sendMessage(data.lastMessage.chat.id, "Favor digite um número maior que zero:");
 
-        return await this.waitForNumber(fn);
+        return this.waitForNumber(fn)(data, next, restart);
       }
 
-      return await fn(data, num, next);
+      return await fn(data, num, next, restart);
     });
   }
 
-  public waitForPhonenumber(fn: (data: T, phonenumber: number, next: CommandNext<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
-    return this.waitForNumber(async (data: T, num: number, next: CommandNext<T>) => {
+  public waitForPhonenumber(fn: (data: T, phonenumber: number, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
+    return this.waitForNumber(async (data: T, num: number, next: CommandNext<T>, restart: CommandRestart<T>) => {
       if (String(num).length < 8 || String(num).length > 15) {
         await this.client.sendMessage(data.lastMessage.chat.id, "Favor digite um número no formato internacional (Ex: +55 15 12345-9999):");
 
-        return await this.waitForPhonenumber(fn);
+        return this.waitForPhonenumber(fn)(data, next, restart);
       }
 
-      return await fn(data, num, next);
+      return await fn(data, num, next, restart);
     });
   }
 
-  public waitForOption(options: Array<any>, fn: (data: T, option: number, next: CommandNext<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
-    return this.waitForText(async (data: T, text: string, next: CommandNext<T>) => {
+  public waitForOption(options: Array<any>, fn: (data: T, option: number, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandFunction<T>>): CommandFunction<T> {
+    return this.waitForText(async (data: T, text: string, next: CommandNext<T>, restart: CommandRestart<T>) => {
       const result = options.filter((opt) => text.toLowerCase().includes(String(opt).toLowerCase()));
 
       if (result.length > 0) {
@@ -135,7 +140,7 @@ export default class Command<T extends ICommandData> extends rompot.Command {
           index = Number(i);
         }
 
-        return await fn(data, result[index], next);
+        return await fn(data, result[index], next, restart);
       }
 
       const option = Number(Number(text.replace(/\D+/g, "")));
@@ -143,10 +148,10 @@ export default class Command<T extends ICommandData> extends rompot.Command {
       if (Number.isNaN(option) || option < 1 || option > options.length) {
         await this.client.sendMessage(data.lastMessage.chat.id, "Favor digite o número de uma das opções:");
 
-        return await this.waitForOption(options, fn);
+        return this.waitForOption(options, fn)(data, next, restart);
       }
 
-      return await fn(data, Number(option.toFixed(0)) - 1, next);
+      return await fn(data, Number(option.toFixed(0)) - 1, next, restart);
     });
   }
 
