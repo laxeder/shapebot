@@ -18,7 +18,7 @@ cmd.keys = [CMDKey("adicion", "admin")];
 //! ===== Etapa 1: Inicialização =====
 
 cmd.addTask(async (data, next) => {
-  await cmd.client.sendMessage(cmd.chatId, "Mande-me o número do novo admin do bot:");
+  await cmd.sendMessage("Mande-me o número do novo administrador do bot:");
 
   return next();
 });
@@ -27,6 +27,12 @@ cmd.addTask(async (data, next) => {
 
 cmd.addTask(
   cmd.waitForPhonenumber(async (data, phonenumber, next) => {
+    if (phonenumber == null) {
+      await cmd.sendMessage("A adição de um novo administrador ao bot foi cancelada! ❌");
+
+      return cmd.stop();
+    }
+
     data.phonenumber = phonenumber;
 
     return next(data);
@@ -40,7 +46,7 @@ cmd.addTask(async (data) => {
 
   await botController.addBotAdmins(cmd.clientId, String(data.phonenumber));
 
-  await cmd.client.sendMessage(cmd.chatId, "Novo administrador adicionado com sucesso! ✅");
+  await cmd.sendMessage("Novo administrador adicionado ao bot com sucesso! ✅");
 
   return cmd.stop();
 });
