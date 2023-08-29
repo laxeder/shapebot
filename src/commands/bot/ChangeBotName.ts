@@ -9,8 +9,7 @@ import { Requeriments } from "@shared/Requeriments";
 
 //! ===== Configurando comando =====
 
-const data = CommandDataUtils.generateEmpty({ name: "" });
-const cmd = new Command(data);
+const cmd = new Command(CommandDataUtils.generateEmpty({ name: "" }));
 
 cmd.id = "change-bot-name";
 cmd.permissions = [Requeriments.BotAdmin];
