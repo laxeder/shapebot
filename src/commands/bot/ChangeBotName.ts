@@ -38,7 +38,7 @@ cmd.addTask(
 cmd.addTask(async (data) => {
   const botController = new BotController(RepositoryUtils.getBotRepository());
 
-  await botController.updateBot({ id: cmd.clientId, name: data.name });
+  await botController.updateBot(cmd.client.id, { name: data.name });
 
   await cmd.client.sendMessage(cmd.chatId, "O nome do bot foi alterado com sucesso! ✅");
 
