@@ -72,4 +72,24 @@ export default class TextUtils {
 
     return text.trim();
   }
+
+  public static startsWith(str: string, value: string, ...ignored: string[]): boolean {
+    if (!str.includes(value)) return false;
+
+    for (const ignore of ignored) {
+      if (ignore.includes(value)) return false;
+    }
+
+    return true;
+  }
+
+  public static isCanceled(text: string, ...ignored: string[]): boolean {
+    const lower = text.toLowerCase().trim();
+
+    if (TextUtils.startsWith(lower, "cancel", ...ignored)) return true;
+    if (TextUtils.startsWith(lower, "sair", ...ignored)) return true;
+    if (TextUtils.startsWith(lower, "termin", ...ignored)) return true;
+
+    return false;
+  }
 }

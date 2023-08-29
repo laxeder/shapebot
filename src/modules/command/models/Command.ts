@@ -5,6 +5,7 @@ import type { CommandNext } from "@modules/command/types/CommandNext";
 import * as rompot from "rompot";
 
 import ICommandData from "@modules/command/interfaces/ICommandData";
+import TextUtils from "@utils/TextUtils";
 
 export default class Command<T extends ICommandData> extends rompot.Command {
   public id: string = "";
@@ -98,7 +99,7 @@ export default class Command<T extends ICommandData> extends rompot.Command {
     };
   }
 
-  public waitForText(fn: (data: T, text: string, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
+  public waitForText(fn: (data: T, text: string | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
     return this.waitForMessage(async (data: T, message: rompot.IMessage, next: CommandNext<T>, restart: CommandRestart<T>) => {
       if (!message.text) {
         await this.client.sendMessage(data.lastMessage.chat.id, "Favor digite um texto válido:");
@@ -106,12 +107,20 @@ export default class Command<T extends ICommandData> extends rompot.Command {
         return this.waitForText(fn)(data, next, restart);
       }
 
+      if (TextUtils.isCanceled(message.text)) {
+        return await fn(data, null, next, restart);
+      }
+
       return await fn(data, message.text, next, restart);
     });
   }
 
-  public waitForNumber(fn: (data: T, number: number, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>, allNumbers: boolean = false): CommandTask<T> {
-    return this.waitForText(async (data: T, text: string, next: CommandNext<T>, restart: CommandRestart<T>) => {
+  public waitForNumber(fn: (data: T, number: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>, allNumbers: boolean = false): CommandTask<T> {
+    return this.waitForText(async (data, text, next, restart) => {
+      if (text == null) {
+        return await fn(data, null, next, restart);
+      }
+
       const num = Number(text.replace(/\D+/g, ""));
 
       if (Number.isNaN(num)) {
@@ -130,8 +139,12 @@ export default class Command<T extends ICommandData> extends rompot.Command {
     });
   }
 
-  public waitForPhonenumber(fn: (data: T, phonenumber: number, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
-    return this.waitForNumber(async (data: T, num: number, next: CommandNext<T>, restart: CommandRestart<T>) => {
+  public waitForPhonenumber(fn: (data: T, phonenumber: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
+    return this.waitForNumber(async (data, num, next, restart) => {
+      if (num == null) {
+        return await fn(data, null, next, restart);
+      }
+
       if (String(num).length < 8 || String(num).length > 15) {
         await this.client.sendMessage(data.lastMessage.chat.id, "Favor digite um número no formato internacional (Ex: +55 15 12345-9999):");
 
@@ -142,8 +155,12 @@ export default class Command<T extends ICommandData> extends rompot.Command {
     });
   }
 
-  public waitForOption(options: Array<any>, fn: (data: T, option: number, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
-    return this.waitForText(async (data: T, text: string, next: CommandNext<T>, restart: CommandRestart<T>) => {
+  public waitForOption(options: Array<any>, fn: (data: T, option: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
+    return this.waitForText(async (data, text, next, restart) => {
+      if (text == null) {
+        return await fn(data, null, next, restart);
+      }
+
       const result = options.filter((opt) => text.toLowerCase().includes(String(opt).toLowerCase()));
 
       if (result.length > 0) {
