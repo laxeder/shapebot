@@ -30,7 +30,7 @@ cmd.addTask(
   cmd.waitForText(async (data, name, next, restart) => {
     data.name = name;
 
-    return restart();
+    return next(data);
   })
 );
 
