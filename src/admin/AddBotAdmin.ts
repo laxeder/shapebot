@@ -33,6 +33,16 @@ cmd.addTask(
       return cmd.stop();
     }
 
+    const botController = new BotController(RepositoryUtils.getBotRepository());
+
+    const botData = await botController.getBotById(cmd.client.id);
+
+    if (botData.admins.includes(String(phonenumber))) {
+      await cmd.sendMessage("Esse número já é administrador do bot! ❌");
+
+      return cmd.stop();
+    }
+
     data.phonenumber = phonenumber;
 
     return next(data);
