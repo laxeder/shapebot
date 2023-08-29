@@ -5,4 +5,4 @@ import ICommandData from "@modules/command/interfaces/ICommandData";
 
 type Awaitable<T> = Promise<T> | T;
 
-export type CommandFunction<T extends ICommandData> = (data: T, next: CommandNext<T>, restart: CommandRestart<T>) => Awaitable<ReturnType<CommandNext<T>>>;
+export type CommandTask<T extends ICommandData> = (data: T, next: CommandNext<T>, restart: CommandRestart<T>) => Awaitable<ReturnType<CommandNext<T>>>;

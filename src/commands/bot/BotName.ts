@@ -18,7 +18,7 @@ cmd.keys = [CMDKey("alter", "nome", "bot"), CMDKey("defin", "nome", "bot")];
 
 //! ===== Etapa 1: Inicialização =====
 
-cmd.addFunc(async (data, next) => {
+cmd.addTask(async (data, next) => {
   await cmd.client.sendMessage(cmd.chatId, "Mande-me o novo nome do bot:");
 
   return next();
@@ -26,17 +26,17 @@ cmd.addFunc(async (data, next) => {
 
 //! ===== Etapa 2: Obtendo novo nome =====
 
-cmd.addFunc(
+cmd.addTask(
   cmd.waitForText(async (data, name, next, restart) => {
     data.name = name;
 
-    return next(data);
+    return restart();
   })
 );
 
 //! ===== Etapa 3: Salvando novo nome =====
 
-cmd.addFunc(async (data) => {
+cmd.addTask(async (data) => {
   const botController = new BotController(RepositoryUtils.getBotRepository());
 
   await botController.updateBot({ id: cmd.clientId, name: data.name });

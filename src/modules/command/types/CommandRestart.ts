@@ -1,5 +1,5 @@
-import type { CommandFunction } from "@modules/command/types/CommandFunction";
+import type { CommandTask } from "@modules/command/types/CommandTask";
 
 import ICommandData from "@modules/command/interfaces/ICommandData";
 
-export type CommandRestart<T extends ICommandData> = (index?: number) => CommandFunction<T> | null;
+export type CommandRestart<T extends ICommandData> = (index?: number) => CommandTask<T> | null;
