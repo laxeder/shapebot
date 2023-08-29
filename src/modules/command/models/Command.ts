@@ -27,6 +27,16 @@ export default class Command<T extends ICommandData> extends rompot.Command {
     this.data = data;
   }
 
+  public async sendMessage(message: string | rompot.IMessage): Promise<rompot.IMessage> {
+    if (typeof message != "string" && rompot.isMessage(message)) {
+      if (!message.chat.id) message.chat.id = this.chatId;
+
+      return await this.client.send(message);
+    } else {
+      return await this.client.sendMessage(this.chatId, message);
+    }
+  }
+
   public addTask(fn: CommandTask<T>): void {
     this.tasks.push(fn);
   }
