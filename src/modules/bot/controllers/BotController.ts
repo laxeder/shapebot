@@ -27,11 +27,46 @@ export default class BotController {
 
   /**
    * Atualiza um bot existente.
+   * @param id - Id do bot que será atualizado.
    * @param bot - Os campos atualizados do bot.
    * @throws ClientError se o bot não estiver habilitado.
    */
-  public async updateBot(bot: Partial<Bot>): Promise<void> {
-    await this.repo.update(bot);
+  public async updateBot(id: string, bot: Partial<Bot>): Promise<void> {
+    await this.repo.update({ ...bot, id });
+  }
+
+  /**
+   * Adiciona novos administradores há um bot existente.
+   * @param id - Id do bot que será atualizado.
+   * @param admins - Os novos administradores do bot.
+   * @throws ClientError se o bot não estiver habilitado.
+   */
+  public async addBotAdmins(id: string, ...admins: string[]): Promise<void> {
+    const botData = await this.repo.read(new Bot({ id }));
+
+    const newAdmins: string[] = [...botData.admins];
+
+    for (const admin of admins) {
+      if (newAdmins.includes(admin)) return;
+
+      newAdmins.push(admin);
+    }
+
+    await this.repo.update({ admins: newAdmins, id });
+  }
+
+  /**
+   * Remove os administradores de um bot existente.
+   * @param id - Id do bot que será atualizado.
+   * @param admins - Os administradores que serão removidos do bot.
+   * @throws ClientError se o bot não estiver habilitado.
+   */
+  public async removeBotAdmins(id: string, ...admins: string[]): Promise<void> {
+    const botData = await this.repo.read(new Bot({ id }));
+
+    const newAdmins: string[] = botData.admins.filter((admin) => !admins.includes(admin));
+
+    await this.repo.update({ admins: newAdmins, id });
   }
 
   /**
