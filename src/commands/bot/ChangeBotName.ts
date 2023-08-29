@@ -18,7 +18,7 @@ cmd.keys = [CMDKey("alter", "nome", "bot"), CMDKey("defin", "nome", "bot")];
 //! ===== Etapa 1: Inicialização =====
 
 cmd.addTask(async (data, next) => {
-  await cmd.client.sendMessage(cmd.chatId, "Mande-me o novo nome do bot:");
+  await cmd.sendMessage("Mande-me o novo nome do bot:");
 
   return next();
 });
@@ -26,7 +26,13 @@ cmd.addTask(async (data, next) => {
 //! ===== Etapa 2: Obtendo novo nome =====
 
 cmd.addTask(
-  cmd.waitForText(async (data, name, next, restart) => {
+  cmd.waitForText(async (data, name, next) => {
+    if (name == null) {
+      await cmd.sendMessage("A alteração do nome do bot foi cancelada! ❌");
+
+      return cmd.stop();
+    }
+
     data.name = name;
 
     return next(data);
@@ -40,7 +46,7 @@ cmd.addTask(async (data) => {
 
   await botController.updateBot(cmd.client.id, { name: data.name });
 
-  await cmd.client.sendMessage(cmd.chatId, "O nome do bot foi alterado com sucesso! ✅");
+  await cmd.sendMessage("O nome do bot foi alterado com sucesso! ✅");
 
   return cmd.stop();
 });
