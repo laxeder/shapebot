@@ -30,7 +30,7 @@ cmd.addTask(
     if (name == null) {
       await cmd.sendMessage("A alteração do nome do bot foi cancelada! ❌");
 
-      return cmd.stop();
+      return cmd.stopTasks();
     }
 
     data.name = name;
@@ -48,7 +48,7 @@ cmd.addTask(async (data) => {
 
   await cmd.sendMessage("O nome do bot foi alterado com sucesso! ✅");
 
-  return cmd.stop();
+  return cmd.stopTasks();
 });
 
 export default [cmd];

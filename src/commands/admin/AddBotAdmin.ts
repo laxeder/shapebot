@@ -30,7 +30,7 @@ cmd.addTask(
     if (phonenumber == null) {
       await cmd.sendMessage("A adição de um novo administrador ao bot foi cancelada! ❌");
 
-      return cmd.stop();
+      return cmd.stopTasks();
     }
 
     const botController = new BotController(RepositoryUtils.getBotRepository());
@@ -40,7 +40,7 @@ cmd.addTask(
     if (botData.admins.includes(String(phonenumber))) {
       await cmd.sendMessage("Esse número já é administrador do bot! ❌");
 
-      return cmd.stop();
+      return cmd.stopTasks();
     }
 
     data.phonenumber = phonenumber;
@@ -58,7 +58,7 @@ cmd.addTask(async (data) => {
 
   await cmd.sendMessage("Novo administrador adicionado ao bot com sucesso! ✅");
 
-  return cmd.stop();
+  return cmd.stopTasks();
 });
 
 export default [cmd];

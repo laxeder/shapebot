@@ -28,7 +28,7 @@ cmd.addTask(async (data, next) => {
   if (data.admins.length == 0) {
     await cmd.client.sendMessage(cmd.chatId, "Nenhum administrador foi adicionado no bot! ❌");
 
-    return cmd.stop();
+    return cmd.stopTasks();
   }
 
   return next(data);

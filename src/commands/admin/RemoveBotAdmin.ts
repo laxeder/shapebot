@@ -28,7 +28,7 @@ cmd.addTask(async (data, next) => {
   if (data.admins.length == 0) {
     await cmd.sendMessage("Nenhum administrador foi adicionado no bot! ❌");
 
-    return cmd.stop();
+    return cmd.stopTasks();
   }
 
   return next(data);
@@ -55,7 +55,7 @@ cmd.addTask(
     if (option == null) {
       await cmd.sendMessage("A remoção de um administrador do bot foi cancelada! ❌");
 
-      return cmd.stop();
+      return cmd.stopTasks();
     }
 
     data.phonenumber = data.admins[option];
@@ -73,7 +73,7 @@ cmd.addTask(async (data) => {
 
   await cmd.sendMessage("O administrador foi removido do bot com sucesso! ✅");
 
-  return cmd.stop();
+  return cmd.stopTasks();
 });
 
 export default [cmd];
