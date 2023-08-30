@@ -77,8 +77,6 @@ export default class CommandController extends rompot.CommandController {
       }
     }
 
-    console.log(commandResult);
-
     if (commandResult == null || !(commandResult.command instanceof Command)) {
       return null;
     }
