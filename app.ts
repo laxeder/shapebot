@@ -1,8 +1,9 @@
 import { MultiFileAuthState } from "rompot";
 
+import { getEnvironment } from "@configs/environments";
+
 import RepositoryUtils from "@modules/database/utils/RepositoryUtils";
 import BotController from "@modules/bot/controllers/BotController";
-import { getEnvironment } from "@configs/environments";
 
 import Logger from "@shared/Logger";
 
