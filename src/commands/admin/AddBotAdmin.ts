@@ -49,7 +49,7 @@ cmd.addTask(
   })
 );
 
-//! ===== Etapa 3: SAdicionando o novo admin =====
+//! ===== Etapa 3: Adicionando o novo admin =====
 
 cmd.addTask(async (data) => {
   const botController = new BotController(RepositoryUtils.getBotRepository());
