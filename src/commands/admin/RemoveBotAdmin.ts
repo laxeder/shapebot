@@ -51,7 +51,7 @@ cmd.addTask(async (data, next) => {
 //! ===== Etapa 3: Obtendo administrador escolhido =====
 
 cmd.addTask(
-  cmd.waitForOption(cmd.data.admins, async (data, option, next) => {
+  cmd.waitForOption(cmd.getDataValue("admins"), async (data, option, next) => {
     if (option == null) {
       await cmd.sendMessage("A remoção de um administrador do bot foi cancelada! ❌");
 
