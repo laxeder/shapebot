@@ -30,6 +30,10 @@ export default class CommandController extends rompot.CommandController {
   }
 
   public searchCommand(text: string): Command<any> | null {
+    if (this.config.lowerCase) {
+      text = text.toLowerCase();
+    }
+
     const commands: { key: rompot.ICommandKey; command: rompot.ICommand }[] = [];
 
     for (const command of this.commands) {
@@ -45,7 +49,9 @@ export default class CommandController extends rompot.CommandController {
         if (resKey != null && resKey.values.join("").length > keys.values.join("").length) continue;
 
         for (const index in keys.values) {
-          if (!text.includes(keys.values[index])) break;
+          const value = this.config.lowerCase ? keys.values[index].toLowerCase() : keys.values[index];
+
+          if (!text.includes(value)) break;
 
           if (Number(index) != keys.values.length - 1) continue;
 
@@ -70,6 +76,8 @@ export default class CommandController extends rompot.CommandController {
         commandResult = { key, command };
       }
     }
+
+    console.log(commandResult);
 
     if (commandResult == null || !(commandResult.command instanceof Command)) {
       return null;
