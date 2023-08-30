@@ -14,7 +14,7 @@ export const cmd = new Command(CommandDataUtils.generateEmpty({ admins: [] as st
 
 cmd.id = "list-bot-admins";
 cmd.permissions = [Requeriments.BotAdmin];
-cmd.keys = [CMDKey("admins", "administradores")];
+cmd.keys = [CMDKey("admins"), CMDKey("administradores")];
 
 //! ===== Etapa 1: Obtendo os administradores do bot =====
 
