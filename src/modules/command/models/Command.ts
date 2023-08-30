@@ -5,6 +5,9 @@ import type { CommandNext } from "@modules/command/types/CommandNext";
 import * as rompot from "rompot";
 
 import ICommandData from "@modules/command/interfaces/ICommandData";
+
+import Logger from "@shared/Logger";
+
 import TextUtils from "@utils/TextUtils";
 
 export default class Command<T extends ICommandData> extends rompot.Command {
@@ -15,6 +18,20 @@ export default class Command<T extends ICommandData> extends rompot.Command {
 
   //? Implementado externamente
   public saveData: (data: T) => any = () => {};
+
+  public emitError: (err: any) => any = async (error) => {
+    try {
+      Logger.error(error, `Command error "${this.id}" - [${this.data.currentTaskIndex}]: ${JSON.stringify(this.data, ["\n"], 2)}`);
+
+      if (this.data.currentTaskIndex == 0) {
+        await this.sendMessage("Serviço indiponível no momento! Favor tente novamente mais tarde.");
+      } else {
+        await this.sendMessage("Um erro ocorreu durante o processamento da conversa. Favor tente novamente, acaso persista no problema comunique com o suporte do bot.");
+      }
+    } catch (err) {
+      Logger.error(err, "Command logger error", `"${this.id}"`);
+    }
+  };
 
   get chatId(): string {
     return this.data.lastMessage.chat.id;
@@ -64,38 +81,64 @@ export default class Command<T extends ICommandData> extends rompot.Command {
 
     this.saveData(this.data);
 
-    return await this.initTask(this.getTask(this.data.currentTaskIndex));
+    await this.initTask(this.getTask(this.data.currentTaskIndex));
   }
 
-  public async initTask(task: ReturnType<CommandNext<T>>): Promise<void> {
-    if (task == null) return;
+  public async initTask(task: Awaited<ReturnType<CommandNext<T>>>): Promise<void> {
+    try {
+      if (task == null) return;
 
-    return this.initTask(await task(this.data, this.nextTask, this.restartTask));
+      const fn = await task(this.data, this.nextTask, this.restartTask);
+
+      if (fn == null) return;
+
+      await this.initTask(fn);
+    } catch (err) {
+      this.emitError(err);
+    }
   }
 
   public nextTask(updatedData: T = this.data, index: number = this.data.currentTaskIndex + 1): ReturnType<CommandNext<T>> {
-    this.data = updatedData;
-    this.data.currentTaskIndex = index;
+    try {
+      this.data = updatedData;
+      this.data.currentTaskIndex = index;
 
-    this.saveData(this.data);
+      this.saveData(this.data);
 
-    return this.getTask(index);
+      return this.getTask(index);
+    } catch (err) {
+      this.emitError(err);
+
+      return null;
+    }
   }
 
-  public restartTask(index: number = this.data.currentTaskIndex) {
-    this.data.currentTaskIndex = index;
+  public restartTask(index: number = this.data.currentTaskIndex): ReturnType<CommandNext<T>> {
+    try {
+      this.data.currentTaskIndex = index;
 
-    this.saveData(this.data);
+      this.saveData(this.data);
 
-    return this.getTask(index);
+      return this.getTask(index);
+    } catch (err) {
+      this.emitError(err);
+
+      return null;
+    }
   }
 
   public stopTasks(): null {
-    this.data.running = false;
+    try {
+      this.data.running = false;
 
-    this.saveData(this.data);
+      this.saveData(this.data);
 
-    return null;
+      return null;
+    } catch (err) {
+      this.emitError(err);
+
+      return null;
+    }
   }
 
   public async sendMessage(message: string | rompot.IMessage): Promise<rompot.IMessage> {
