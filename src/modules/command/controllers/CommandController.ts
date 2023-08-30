@@ -3,6 +3,9 @@ import * as rompot from "rompot";
 import Command from "@modules/command/models/Command";
 
 import { Requeriments } from "@shared/Requeriments";
+import Logger from "@shared/Logger";
+
+import FileUtils from "@utils/FileUtils";
 
 export default class CommandController extends rompot.CommandController {
   constructor(config: Partial<rompot.ICommandControllerConfig> = {}) {
@@ -97,5 +100,42 @@ export default class CommandController extends rompot.CommandController {
     await this.execCommand(message, command);
 
     return true;
+  }
+
+  public static async readCommands(dir: string): Promise<Command<any>[]> {
+    const commands: Command<any>[] = [];
+
+    await FileUtils.readRecursiveDir(dir, async (filepath, filename, ext) => {
+      try {
+        if (ext != ".ts" && ext != ".js") return;
+
+        const content = require(filepath);
+
+        if (!!!content) return;
+        if (typeof content != "object") return;
+
+        await Promise.all(
+          Object.keys(content || {}).map(async (key) => {
+            try {
+              const cmd = content[key];
+
+              if (!!!cmd) return;
+              if (!rompot.isCommand(cmd)) return;
+              if (!(cmd instanceof Command)) return;
+
+              await cmd.onRead();
+
+              commands.push(cmd);
+            } catch (err) {
+              Logger.error(err, "Verify command in path", `"${filepath}"`);
+            }
+          })
+        );
+      } catch (err) {
+        Logger.error(err, "Verify commands in path", `"${filepath}"`);
+      }
+    });
+
+    return commands;
   }
 }
