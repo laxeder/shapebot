@@ -158,7 +158,7 @@ export default class BotController {
 
     client.setCommandController(commandController);
 
-    const commands = await CommandController.readCommands(`${__dirname}/src/commands`);
+    const commands = await CommandController.readCommands(`${__dirname}/../../../commands`);
 
     client.setCommands(commands);
 
