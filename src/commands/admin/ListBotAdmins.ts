@@ -10,7 +10,7 @@ import TextUtils from "@utils/TextUtils";
 
 //! ===== Configurando comando =====
 
-const cmd = new Command(CommandDataUtils.generateEmpty({ admins: [] as string[] }));
+export const cmd = new Command(CommandDataUtils.generateEmpty({ admins: [] as string[] }));
 
 cmd.id = "list-bot-admins";
 cmd.permissions = [Requeriments.BotAdmin];

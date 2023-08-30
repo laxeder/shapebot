@@ -10,7 +10,7 @@ import TextUtils from "@utils/TextUtils";
 
 //! ===== Configurando comando =====
 
-const cmd = new Command(CommandDataUtils.generateEmpty({ admins: [] as string[], phonenumber: "" }));
+export const cmd = new Command(CommandDataUtils.generateEmpty({ admins: [] as string[], phonenumber: "" }));
 
 cmd.id = "remove-bot-admin";
 cmd.permissions = [Requeriments.BotAdmin];

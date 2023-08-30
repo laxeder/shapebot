@@ -9,7 +9,7 @@ import { Requeriments } from "@shared/Requeriments";
 
 //! ===== Configurando comando =====
 
-const cmd = new Command(CommandDataUtils.generateEmpty({ name: "" }));
+export const cmd = new Command(CommandDataUtils.generateEmpty({ name: "" }));
 
 cmd.id = "change-bot-name";
 cmd.permissions = [Requeriments.BotAdmin];
@@ -50,5 +50,3 @@ cmd.addTask(async (data) => {
 
   return cmd.stopTasks();
 });
-
-export default [cmd];
