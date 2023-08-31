@@ -6,6 +6,7 @@ import BotController from "@modules/bot/controllers/BotController";
 import Command from "@modules/command/models/Command";
 
 import { Requeriments } from "@shared/Requeriments";
+
 import TextUtils from "@utils/TextUtils";
 
 //! ===== Configurando comando =====
@@ -26,7 +27,7 @@ cmd.addTask(async (data, next) => {
   data.admins = botData.admins.filter((admin) => admin != cmd.client.id);
 
   if (data.admins.length == 0) {
-    await cmd.client.sendMessage(cmd.chatId, "Nenhum administrador foi adicionado no bot! ❌");
+    await cmd.sendMessage("Nenhum administrador foi adicionado no bot! ❌");
 
     return cmd.stopTasks();
   }
@@ -43,7 +44,7 @@ cmd.addTask(async (data, next) => {
     .addLine()
     .addLine(`Digite ${TextUtils.bold("adicionar admin")} para adicionar um novo admin ou ${TextUtils.bold("remover admin")} para remover um admin existente`);
 
-  await cmd.client.sendMessage(cmd.chatId, textUtils.getText());
+  await cmd.sendMessage(textUtils.getText());
 
   return next(data);
 });
