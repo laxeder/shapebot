@@ -1,11 +1,15 @@
 import * as rompot from "rompot";
 
+import CommandDataController from "@modules/command/controllers/CommandDataController";
+import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
+import DatabaseUtils from "@modules/database/utils/DatabaseUtils";
 import Command from "@modules/command/models/Command";
 
 import { Requeriments } from "@shared/Requeriments";
 import Logger from "@shared/Logger";
 
 import FileUtils from "@utils/FileUtils";
+import { injectJSON } from "@utils/JSON";
 
 export default class CommandController extends rompot.CommandController {
   constructor(config: Partial<rompot.ICommandControllerConfig> = {}) {
@@ -81,10 +85,6 @@ export default class CommandController extends rompot.CommandController {
       return null;
     }
 
-    commandResult.command.saveData = async (data) => {
-      //TODO: implementar salvamento
-    };
-
     return commandResult.command;
   }
 
@@ -97,13 +97,27 @@ export default class CommandController extends rompot.CommandController {
       return false;
     }
 
+    if (!(command instanceof Command)) return false;
+
+    const cmd = injectJSON(command, new Command(CommandDataUtils.generateEmpty({})));
+
+    cmd.client = this.client;
+    cmd.data.id = command.id;
+    cmd.data.botId = this.client.id;
+    cmd.data.chatId = message.chat.id;
+
+    const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
+
+    cmd.setSaveData(commandDataController.saveData.bind(commandDataController));
+    cmd.setRestoreData(commandDataController.restoreData.bind(commandDataController));
+
     if (type == rompot.CMDRunType.Reply) {
-      await this.replyCommand(message, command);
+      await this.replyCommand(message, cmd);
 
       return true;
     }
 
-    await this.execCommand(message, command);
+    await this.execCommand(message, cmd);
 
     return true;
   }

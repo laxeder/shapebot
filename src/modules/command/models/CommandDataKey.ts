@@ -1,5 +1,5 @@
-import ICommandData from "../interfaces/ICommandData";
+import CommandData from "@modules/command/models/CommandData";
 
-export default class CommandDataKey<T extends ICommandData> {
+export default class CommandDataKey<T extends CommandData> {
   constructor(public key: keyof T) {}
 }

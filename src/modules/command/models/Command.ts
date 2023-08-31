@@ -1,25 +1,31 @@
+import type { CommandAwaitable } from "@modules/command/types/CommandAwaitable";
 import type { CommandRestart } from "@modules/command/types/CommandRestart";
 import type { CommandTask } from "@modules/command/types/CommandTask";
 import type { CommandNext } from "@modules/command/types/CommandNext";
 
 import * as rompot from "rompot";
 
-import ICommandData from "@modules/command/interfaces/ICommandData";
-import CommandDataKey from "@modules/command/models/CommandDataKey";
 import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
+import CommandDataKey from "@modules/command/models/CommandDataKey";
+import CommandData from "@modules/command/models/CommandData";
 
 import Logger from "@shared/Logger";
 
 import TextUtils from "@utils/TextUtils";
 
-export default class Command<T extends ICommandData> extends rompot.Command {
+export default class Command<T extends CommandData> extends rompot.Command {
   public id: string = "";
   public avaible: rompot.ChatType[] = ["pv"];
   public tasks: CommandTask<T>[] = [];
   public data: T;
 
   //? Implementado externamente
-  public saveData: (data: T) => any = () => {};
+  public saveData: (data: T) => any = (data) => {
+    this.data = data;
+  };
+  public restoreData: (data: T) => CommandAwaitable<T> = (data) => {
+    return data;
+  };
 
   public emitError: (err: any) => any = async (error) => {
     try {
@@ -34,14 +40,6 @@ export default class Command<T extends ICommandData> extends rompot.Command {
       Logger.error(err, "Command logger error", `"${this.id}"`);
     }
   };
-
-  get chatId(): string {
-    return this.data.lastMessage.chat.id;
-  }
-
-  set chatId(id: string) {
-    this.data.lastMessage.chat.id = id;
-  }
 
   constructor(data: T, keys: rompot.CommandKey[] = []) {
     super();
@@ -58,8 +56,8 @@ export default class Command<T extends ICommandData> extends rompot.Command {
     this.saveData = fn;
   }
 
-  public async restoreData(data: T): Promise<void> {
-    this.data = data;
+  public setRestoreData(fn: this["restoreData"]): void {
+    this.restoreData = fn;
   }
 
   public async onExec(message: rompot.IMessage): Promise<void> {
@@ -81,6 +79,12 @@ export default class Command<T extends ICommandData> extends rompot.Command {
   }
 
   public async startTasks(message: rompot.IMessage): Promise<void> {
+    this.data.id = this.id;
+    this.data.botId = this.client.id;
+    this.data.chatId = message.chat.id;
+
+    this.data = await this.restoreData(this.data);
+
     this.data.lastMessage = message;
     this.data.currentTaskIndex = 0;
     this.data.running = true;
@@ -149,11 +153,11 @@ export default class Command<T extends ICommandData> extends rompot.Command {
 
   public async sendMessage(message: string | rompot.IMessage): Promise<rompot.IMessage> {
     if (typeof message != "string" && rompot.isMessage(message)) {
-      if (!message.chat.id) message.chat.id = this.chatId;
+      if (!message.chat.id) message.chat.id = this.data.chatId;
 
       return await this.client.send(message);
     } else {
-      return await this.client.sendMessage(this.chatId, message);
+      return await this.client.sendMessage(this.data.chatId, message);
     }
   }
 
