@@ -37,7 +37,7 @@ cmd.addTask(async (data, next) => {
 
 //! ===== Etapa 2: Listando administradores =====
 
-cmd.addTask(async (data, next) => {
+cmd.addTask(async (data) => {
   const textUtils = new TextUtils(TextUtils.bold("🔰 Lista de admins"))
     .add(TextUtils.lineDecorator())
     .addLine(TextUtils.generateOptions(data.admins))
@@ -46,7 +46,7 @@ cmd.addTask(async (data, next) => {
 
   await cmd.sendMessage(textUtils.getText());
 
-  return next(data);
+  return cmd.stopTasks();
 });
 
 export default [cmd];
