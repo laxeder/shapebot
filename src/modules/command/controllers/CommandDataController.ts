@@ -1,3 +1,5 @@
+import { Message } from "rompot";
+
 import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
 import { DataStatus } from "@modules/database/shared/DataStatus";
 import CommandData from "@modules/command/models/CommandData";
@@ -35,7 +37,7 @@ export default class CommandDataController {
 
   /**
    * Restaura os dados de um comando salvo.
-   * @param data - Os dados do comando que serão restuarados.
+   * @param data - Os dados do comando que serão restaurados.
    * @throws ClientError se os campos necessários não estiverem definidos.
    */
   public async restoreData<T extends CommandData>(data: Partial<T>): Promise<T> {
@@ -59,11 +61,37 @@ export default class CommandDataController {
     newData.botId = data.botId;
     newData.chatId = data.chatId;
     newData.status = DataStatus.Enabled;
-
-    if (!newData.createdAt) {
-      newData.createdAt = DateUtils.ISO();
-    }
+    newData.createdAt = DateUtils.ISO();
+    newData.updatedAt = DateUtils.ISO();
+    newData.lastMessage = new Message(newData.lastMessage.chat.id, newData.lastMessage.text, newData.lastMessage);
 
     return newData;
+  }
+
+  /**
+   * Lista os dados de todos os comandos salvos.
+   * @param data - Os dados do comando que serão listados.
+   * @throws ClientError se os campos necessários não estiverem definidos.
+   */
+  public async listAllChatsData(data: Partial<CommandData>): Promise<CommandData[]> {
+    if (!data.id) {
+      throw new ClientError("Command id not declared", "Não foi possível salvar os dados do comando");
+    }
+
+    if (!data.botId) {
+      throw new ClientError("Command bot id not declared", "Não foi possível salvar os dados do comando");
+    }
+
+    const allChatsData: CommandData[] = [];
+
+    const datas = await this.db.findAll(`/commands/${data.botId}/${data.id}/save`);
+
+    for (const commandData of datas) {
+      const newData = DataModel.inject(CommandDataUtils.generateEmpty(data), commandData, true);
+
+      allChatsData.push(newData);
+    }
+
+    return allChatsData;
   }
 }

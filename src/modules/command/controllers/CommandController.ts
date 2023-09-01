@@ -102,9 +102,8 @@ export default class CommandController extends rompot.CommandController {
     const cmd = injectJSON(command, new Command(CommandDataUtils.generateEmpty({})));
 
     cmd.client = this.client;
-    cmd.data.id = command.id;
-    cmd.data.botId = this.client.id;
-    cmd.data.chatId = message.chat.id;
+
+    await cmd.onRead();
 
     const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
 
@@ -122,7 +121,7 @@ export default class CommandController extends rompot.CommandController {
     return true;
   }
 
-  public static async readCommands(dir: string): Promise<Command<any>[]> {
+  public async readCommands(dir: string): Promise<Command<any>[]> {
     const commands: Command<any>[] = [];
 
     await FileUtils.readRecursiveDir(dir, async (filepath, filename, ext) => {
@@ -142,6 +141,8 @@ export default class CommandController extends rompot.CommandController {
               if (!!!cmd) return;
               if (!rompot.isCommand(cmd)) return;
               if (!(cmd instanceof Command)) return;
+
+              cmd.client = this.client;
 
               await cmd.onRead();
 

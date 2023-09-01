@@ -1,4 +1,4 @@
-import Client, { Command, IAuth, WhatsAppBot } from "rompot";
+import Client, { IAuth, WhatsAppBot } from "rompot";
 
 import { getBaileysConfig } from "@configs/WAConfig";
 
@@ -6,9 +6,12 @@ import connection from "@events/connection";
 import message from "@events/message";
 import error from "@events/error";
 
+import CommandDataController from "@modules/command/controllers/CommandDataController";
 import CommandController from "@modules/command/controllers/CommandController";
 import DataRepository from "@modules/database/interfaces/DataRepository";
+import DatabaseUtils from "@modules/database/utils/DatabaseUtils";
 import { DataStatus } from "@modules/database/shared/DataStatus";
+import Command from "@modules/command/models/Command";
 import Bot from "@modules/bot/models/Bot";
 
 import Logger from "@shared/Logger";
@@ -162,9 +165,33 @@ export default class BotController {
 
     client.setCommandController(commandController);
 
-    const commands = await CommandController.readCommands(`${__dirname}/../../../commands`);
+    const commands = await commandController.readCommands(`${__dirname}/../../../commands`);
 
     client.setCommands(commands);
+
+    //! ===== Restaurando dados dos comandos ===== !\\
+
+    const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
+
+    for (const command of client.getCommands() as Command<any>[]) {
+      try {
+        if (!(command instanceof Command)) continue;
+
+        const datas = await commandDataController.listAllChatsData(command.data);
+
+        for (const data of datas) {
+          try {
+            if (!data.isRunning) continue;
+
+            client.runCommand(command, data.lastMessage);
+          } catch (err) {
+            Logger.error(err, `Error in restore command data "${command.clientId} - ${command.id} - ${data.chatId}"`);
+          }
+        }
+      } catch (err) {
+        Logger.error(err, `Error in restore command data "${command.clientId} - ${command.id}"`);
+      }
+    }
 
     Logger.info(`Bot "${botId}" foi conectado com sucesso!`);
   }

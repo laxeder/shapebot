@@ -64,6 +64,11 @@ export default class Command<T extends CommandData> extends rompot.Command {
     await this.startTasks(message);
   }
 
+  public async onRead() {
+    this.data.id = this.id;
+    this.data.botId = this.client.id;
+  }
+
   public async onReply(message: rompot.IMessage) {
     await this.startTasks(message);
   }
@@ -79,28 +84,30 @@ export default class Command<T extends CommandData> extends rompot.Command {
   }
 
   public async startTasks(message: rompot.IMessage): Promise<void> {
-    this.data.id = this.id;
-    this.data.botId = this.client.id;
+    this.data.lastMessage = message;
     this.data.chatId = message.chat.id;
 
     this.data = await this.restoreData(this.data);
 
-    this.data.lastMessage = message;
-    this.data.currentTaskIndex = 0;
-    this.data.running = true;
+    if (!this.data.isRunning) {
+      this.data.currentTaskIndex = 0;
+      this.data.isRunning = true;
 
-    this.saveData(this.data);
+      await this.saveData(this.data);
+    }
 
     await this.initTask(this.getTask(this.data.currentTaskIndex));
   }
 
   public async initTask(task: Awaited<ReturnType<CommandNext<T>>>): Promise<void> {
     try {
-      if (task == null) return;
+      if (task == null) {
+        await this.stopTasks();
+
+        return;
+      }
 
       const fn = await task(this.data, this.nextTask.bind(this), this.restartTask.bind(this));
-
-      if (fn == null) return;
 
       await this.initTask(fn);
     } catch (err) {
@@ -137,11 +144,13 @@ export default class Command<T extends CommandData> extends rompot.Command {
     }
   }
 
-  public stopTasks(): null {
+  public async stopTasks(): Promise<null> {
     try {
-      this.data.running = false;
+      if (this.data.isRunning) {
+        this.data.isRunning = false;
 
-      this.saveData(this.data);
+        await this.saveData(this.data);
+      }
 
       return null;
     } catch (err) {
