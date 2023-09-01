@@ -16,15 +16,7 @@ export default class UserRepository implements DataRepository<User> {
    * @throws ClientError se o ID do usuário não estiver definido ou se um usuário com o mesmo ID já existir.
    */
   public async create(user: User): Promise<void> {
-    if (!user.id) {
-      throw new ClientError("User id not declared", "Não foi possível salvar os dados do usuário");
-    }
-
-    if (!user.botId) {
-      throw new ClientError("User bot id not declared", "Não foi possível salvar os dados do usuário");
-    }
-
-    const userData = await this.db.get(`/users/${user.botId}`, user.id);
+    const userData = await this.read(new User(user));
 
     if (userData.status == DataStatus.Enabled) {
       throw new ClientError(`User "${user.botId} - ${user.id}" already exists`, "Um usuário com esse ID já existe em nosso sistema");
@@ -43,15 +35,7 @@ export default class UserRepository implements DataRepository<User> {
    * @throws ClientError se o ID do usuário não estiver definido ou se o usuário não estiver habilitado.
    */
   public async update(user: Partial<User>): Promise<void> {
-    if (!user.id) {
-      throw new ClientError("User id not declared", "Não foi possível atualizar os dados do usuário");
-    }
-
-    if (!user.botId) {
-      throw new ClientError("User bot id not declared", "Não foi possível atualizar os dados do usuário");
-    }
-
-    const userData = await this.db.get(`/users/${user.botId}`, user.id);
+    const userData = await this.read(new User(user));
 
     if (userData.status != DataStatus.Enabled) {
       throw new ClientError(`Not allowed to update user "${user.botId} - ${user.id}"`, "Não foi possível atualizar os dados do usuário");

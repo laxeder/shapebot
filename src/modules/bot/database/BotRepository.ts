@@ -16,11 +16,7 @@ export default class BotRepository implements DataRepository<Bot> {
    * @throws ClientError se o ID do bot não estiver definido ou se um bot com o mesmo ID já existir.
    */
   public async create(bot: Bot): Promise<void> {
-    if (!bot.id) {
-      throw new ClientError("Bot id not declared", "Não foi possível salvar os dados do bot");
-    }
-
-    const botData = await this.db.get("/bots", bot.id);
+    const botData = await this.read(new Bot(bot));
 
     if (botData.status == DataStatus.Enabled) {
       throw new ClientError(`bot "${bot.id}" already exists`, "Um bot com esse número já existe em nosso sistema");
@@ -39,11 +35,7 @@ export default class BotRepository implements DataRepository<Bot> {
    * @throws ClientError se o ID do bot não estiver definido ou se o bot não estiver habilitado.
    */
   public async update(bot: Partial<Bot>): Promise<void> {
-    if (!bot.id) {
-      throw new ClientError("Bot id not declared", "Não foi possível atualizar os dados do bot");
-    }
-
-    const botData = await this.db.get("/bots", bot.id);
+    const botData = await this.read(new Bot(bot));
 
     if (botData.status != DataStatus.Enabled) {
       throw new ClientError(`Not allowed to update bot "${bot.id}"`, "Não foi possível atualizar os dados do bot");
