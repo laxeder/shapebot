@@ -7,9 +7,9 @@ const CroxyDatabase = require("croxydb");
 export default class CroxyDB implements Database {
   private db: any;
 
-  constructor() {
+  constructor(name: string) {
     this.db = new CroxyDatabase(JsonDB, {
-      dbName: "croxy",
+      dbName: name,
       dbFolder: `data/croxydb`,
       noBlankData: true,
       readable: true,
