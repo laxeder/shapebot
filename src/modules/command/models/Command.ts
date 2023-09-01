@@ -8,6 +8,7 @@ import * as rompot from "rompot";
 import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
 import CommandDataKey from "@modules/command/models/CommandDataKey";
 import CommandData from "@modules/command/models/CommandData";
+import ClientError from "@modules/error/models/ClientError";
 
 import Logger from "@shared/Logger";
 
@@ -31,7 +32,9 @@ export default class Command<T extends CommandData> extends rompot.Command {
     try {
       Logger.error(error, `Command error "${this.id}" - [${this.data.currentTaskIndex}]: ${JSON.stringify(this.data, ["\n"], 2)}`);
 
-      if (this.data.currentTaskIndex == 0) {
+      if (error instanceof ClientError) {
+        await this.sendMessage(`${error.message}! ❌`);
+      } else if (this.data.currentTaskIndex == 0) {
         await this.sendMessage("Serviço indiponível no momento! Favor tente novamente mais tarde.");
       } else {
         await this.sendMessage("Um erro ocorreu durante o processamento da conversa. Favor tente executar o comando novamente, acaso persista no problema comunique com o suporte do bot.");
