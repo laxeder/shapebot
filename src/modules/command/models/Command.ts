@@ -27,19 +27,21 @@ export default class Command<T extends CommandData> extends rompot.Command {
     return data;
   };
 
-  public emitError: (err: any) => any = async (error) => {
+  public async emitError(error: any) {
     try {
       Logger.error(error, `Command error "${this.id}" - [${this.data.currentTaskIndex}]: ${JSON.stringify(this.data, ["\n"], 2)}`);
 
       if (this.data.currentTaskIndex == 0) {
         await this.sendMessage("Serviço indiponível no momento! Favor tente novamente mais tarde.");
       } else {
-        await this.sendMessage("Um erro ocorreu durante o processamento da conversa. Favor tente novamente, acaso persista no problema comunique com o suporte do bot.");
+        await this.sendMessage("Um erro ocorreu durante o processamento da conversa. Favor tente executar o comando novamente, acaso persista no problema comunique com o suporte do bot.");
       }
+
+      await this.stopTasks();
     } catch (err) {
       Logger.error(err, "Command logger error", `"${this.id}"`);
     }
-  };
+  }
 
   constructor(data: T, keys: rompot.CommandKey[] = []) {
     super();
