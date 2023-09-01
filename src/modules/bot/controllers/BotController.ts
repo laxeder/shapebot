@@ -152,6 +152,10 @@ export default class BotController {
     client.on("message", (msg) => message(client, msg));
     client.on("error", (err) => error(client, err));
 
+    //! ===== Conectando bot ===== !\\
+
+    await client.connect(auth);
+
     //! ===== Configurando comandos ===== !\\
 
     const commandController = new CommandController();
@@ -161,10 +165,6 @@ export default class BotController {
     const commands = await CommandController.readCommands(`${__dirname}/../../../commands`);
 
     client.setCommands(commands);
-
-    //! ===== Conectando bot ===== !\\
-
-    await client.connect(auth);
 
     Logger.info(`Bot "${botId}" foi conectado com sucesso!`);
   }
