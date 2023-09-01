@@ -37,10 +37,14 @@ export default class CroxyDB implements Database {
     return DataModel.inject(new DataModel(), data, true);
   }
 
-  public async save(key: string, data: DataModel): Promise<void> {
-    key = this.formateKey(key);
+  public async save(key: string, data: DataModel, useDataId: boolean = true): Promise<void> {
+    if (useDataId) {
+      key = this.formateKey(key, data.id);
+    } else {
+      key = this.formateKey(key);
+    }
 
-    await this.db.set(this.formateKey(key, data.id), data);
+    await this.db.set(key, data);
   }
 
   public async remove(key: string, id: string): Promise<void> {

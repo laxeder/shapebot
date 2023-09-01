@@ -9,7 +9,7 @@ export default interface Database {
    * @param key - A chave associada aos dados.
    * @param data - Os dados a serem salvos.
    */
-  save(key: string, data: DataModel): Promise<void>;
+  save(key: string, data: DataModel, useDataId?: boolean): Promise<void>;
 
   /**
    * Obtém os dados com base na chave e no ID fornecidos.

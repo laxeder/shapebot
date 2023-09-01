@@ -30,7 +30,7 @@ export default class CommandDataController {
 
     data.updatedAt = DateUtils.ISO();
 
-    await this.db.save(`/commands/${data.botId}/${data.id}/save/${data.chatId}`, data);
+    await this.db.save(`/commands/${data.botId}/${data.id}/save/${data.chatId}`, data, false);
   }
 
   /**
