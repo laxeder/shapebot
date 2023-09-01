@@ -29,13 +29,19 @@ export default class DataModel implements IDataModel {
     for (const key of keys) {
       if (!force) {
         if (!oldData.hasOwnProperty(key)) continue;
-        if (typeof oldData[key] != typeof newData[key]) continue;
         if (emptyData.hasOwnProperty(key) && !newData[key]) continue;
+
+        if (typeof oldData[key] != typeof newData[key]) {
+          if (typeof oldData[key] == "string" && (typeof newData[key] == "number" || typeof newData[key] == "boolean")) {
+            oldData[key] = `${newData[key]}` as any;
+          }
+
+          continue;
+        }
       }
 
       if (typeof oldData[key] == "object" && typeof newData == "object") {
         if ((oldData[key] as any) instanceof DataModel && (newData[key] as any) instanceof DataModel) {
-          //@ts-ignore
           oldData[key] = DataModel.inject(oldData[key] as any, newData[key] as any);
 
           continue;

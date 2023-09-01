@@ -7,6 +7,7 @@ import Database from "@modules/database/interfaces/Database";
 import ClientError from "@modules/error/models/ClientError";
 import DataModel from "@modules/database/models/DataModel";
 
+import { injectJSON } from "@utils/JSON";
 import DateUtils from "@utils/Date";
 
 export default class CommandDataController {
@@ -63,7 +64,7 @@ export default class CommandDataController {
     newData.status = DataStatus.Enabled;
     newData.createdAt = DateUtils.ISO();
     newData.updatedAt = DateUtils.ISO();
-    newData.lastMessage = new Message(newData.lastMessage.chat.id, newData.lastMessage.text, newData.lastMessage);
+    newData.lastMessage = injectJSON(newData.lastMessage, new Message("", ""));
 
     return newData;
   }

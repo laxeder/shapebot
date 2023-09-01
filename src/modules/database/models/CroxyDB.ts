@@ -1,6 +1,8 @@
 import Database from "@modules/database/interfaces/Database";
 import DataModel from "@modules/database/models/DataModel";
 
+import { JSONParse } from "@utils/JSON";
+
 const JsonDB = require("croxydb/adapters/jsondb");
 const CroxyDatabase = require("croxydb");
 
@@ -44,7 +46,7 @@ export default class CroxyDB implements Database {
       key = this.formateKey(key);
     }
 
-    await this.db.set(key, data);
+    await this.db.set(key, JSONParse(data));
   }
 
   public async remove(key: string, id: string): Promise<void> {

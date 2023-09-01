@@ -1,4 +1,4 @@
-import { FileMessage, IMessage } from "rompot";
+import Client, { FileMessage, IMessage } from "rompot";
 
 /**
  * * Transforma um dado em binário
@@ -22,11 +22,16 @@ export function JSONParse(data: any) {
   try {
     if (typeof data == "object") {
       if (Array.isArray(data)) return data;
+      if (data instanceof Client) return data;
 
       const json: { [key: string]: any } = {};
 
       Object.keys(data).forEach((key) => {
-        json[key] = JSONParse(data[key]);
+        const value = JSONParse(data[key]);
+
+        if (value instanceof Client) return;
+
+        json[key] = value;
       });
 
       return json;
@@ -36,9 +41,7 @@ export function JSONParse(data: any) {
 
     return value;
   } catch (err) {
-    if (`${data}`.startsWith("[") && `${data}`.endsWith("]")) return [];
-
-    return {};
+    return data;
   }
 }
 
