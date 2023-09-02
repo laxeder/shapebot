@@ -56,15 +56,18 @@ export default class CommandDataController {
 
     const commandData = await this.db.get(`/commands/${data.botId}/${data.id}/save`, data.chatId);
 
-    const newData = DataModel.inject(CommandDataUtils.generateEmpty(data), commandData, true) as T;
+    const newData = CommandDataUtils.generateEmpty(commandData) as T;
 
     newData.id = data.id;
     newData.botId = data.botId;
     newData.chatId = data.chatId;
-    newData.status = DataStatus.Enabled;
-    newData.createdAt = DateUtils.ISO();
-    newData.updatedAt = DateUtils.ISO();
     newData.lastMessage = injectJSON(newData.lastMessage, new Message("", ""));
+
+    if (!newData.isRunning || newData.status != DataStatus.Enabled) {
+      newData.updatedAt = DateUtils.ISO();
+      newData.createdAt = DateUtils.ISO();
+      newData.status = DataStatus.Enabled;
+    }
 
     return newData;
   }

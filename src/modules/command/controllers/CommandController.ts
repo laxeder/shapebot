@@ -99,16 +99,16 @@ export default class CommandController extends rompot.CommandController {
 
     if (!(command instanceof Command)) return false;
 
-    const cmd = injectJSON(command, new Command(CommandDataUtils.generateEmpty({})));
-
-    cmd.client = this.client;
-
-    await cmd.onRead();
+    await command.onRead();
 
     const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
 
-    cmd.setSaveData(commandDataController.saveData.bind(commandDataController));
-    cmd.setRestoreData(commandDataController.restoreData.bind(commandDataController));
+    command.setSaveData(commandDataController.saveData.bind(commandDataController));
+    command.setRestoreData(commandDataController.restoreData.bind(commandDataController));
+
+    const cmd = injectJSON(command, new Command(CommandDataUtils.generateEmpty({})), true);
+
+    cmd.client = this.client;
 
     if (type == rompot.CMDRunType.Reply) {
       await this.replyCommand(message, cmd);
