@@ -1,6 +1,5 @@
 import type { CommandAwaitable } from "@modules/command/types/CommandAwaitable";
 import type { CommandRestart } from "@modules/command/types/CommandRestart";
-import type { CommandTask } from "@modules/command/types/CommandTask";
 import type { CommandNext } from "@modules/command/types/CommandNext";
 
 import * as rompot from "rompot";
@@ -8,10 +7,12 @@ import * as rompot from "rompot";
 import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
 import CommandDataKey from "@modules/command/models/CommandDataKey";
 import CommandData from "@modules/command/models/CommandData";
+import CommandTask from "@modules/command/models/CommandTask";
 import ClientError from "@modules/error/models/ClientError";
 
 import Logger from "@shared/Logger";
 
+import { injectJSON } from "@utils/JSON";
 import TextUtils from "@utils/TextUtils";
 
 export default class Command<T extends CommandData> extends rompot.Command {
@@ -78,23 +79,35 @@ export default class Command<T extends CommandData> extends rompot.Command {
     await this.startTasks(message);
   }
 
-  public addTask(task: CommandTask<T>): void {
-    this.tasks.push(task);
+  public addTask(fn: ((data: T, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>) | CommandTask<T>): void {
+    if (fn instanceof CommandTask) {
+      this.tasks.push(fn);
+    } else {
+      const task = new CommandTask(this, "function");
+
+      task.setFunction((command, data, next, restart) => {
+        return fn(data, next, restart);
+      });
+
+      this.tasks.push(task);
+    }
   }
 
-  public getTask(index: number): CommandTask<T> | null {
-    if (index >= this.tasks.length) return null;
+  public getTask(index: number): CommandTask<T> {
+    if (index >= this.tasks.length) return new CommandTask<T>(this, "void");
 
-    return this.tasks[index] || null;
+    return this.tasks[index] || new CommandTask<T>(this, "void");
   }
 
   public async startTasks(message: rompot.IMessage): Promise<void> {
-    this.data.lastMessage = message;
     this.data.chatId = message.chat.id;
 
-    this.data = await this.restoreData(this.data);
+    const restore = await this.restoreData(this.data);
 
-    if (!this.data.isRunning) {
+    if (restore.isRunning) {
+      injectJSON(restore, this.data);
+    } else {
+      this.data.lastMessage = message;
       this.data.currentTaskIndex = 0;
       this.data.isRunning = true;
 
@@ -104,65 +117,49 @@ export default class Command<T extends CommandData> extends rompot.Command {
     await this.initTask(this.getTask(this.data.currentTaskIndex));
   }
 
-  public async initTask(task: Awaited<ReturnType<CommandNext<T>>>): Promise<void> {
+  public async initTask(task: CommandTask<T>): Promise<void> {
     try {
-      if (task == null) {
+      if (task.type == "void") return;
+
+      if (task.type == "stop") {
         await this.stopTasks();
-
-        return;
       }
 
-      const fn = await task(this.data, this.nextTask.bind(this), this.restartTask.bind(this));
+      if (task.type == "function") {
+        const fn = await task.execFunction(this.data, this.nextTask.bind(this), this.restartTask.bind(this));
 
-      await this.initTask(fn);
-    } catch (err) {
-      this.emitError(err);
-    }
-  }
-
-  public nextTask(updatedData: T = this.data, index: number = this.data.currentTaskIndex + 1): ReturnType<CommandNext<T>> {
-    try {
-      this.data = updatedData;
-      this.data.currentTaskIndex = index;
-
-      this.saveData(this.data);
-
-      return this.getTask(index);
-    } catch (err) {
-      this.emitError(err);
-
-      return null;
-    }
-  }
-
-  public restartTask(index: number = this.data.currentTaskIndex): ReturnType<CommandNext<T>> {
-    try {
-      this.data.currentTaskIndex = index;
-
-      this.saveData(this.data);
-
-      return this.getTask(index);
-    } catch (err) {
-      this.emitError(err);
-
-      return null;
-    }
-  }
-
-  public async stopTasks(): Promise<null> {
-    try {
-      if (this.data.isRunning) {
-        this.data.isRunning = false;
-
-        await this.saveData(this.data);
+        await this.initTask(fn);
       }
-
-      return null;
     } catch (err) {
       this.emitError(err);
-
-      return null;
     }
+  }
+
+  public async nextTask(data: T = this.data, index: number = this.data.currentTaskIndex + 1): Promise<CommandTask<T>> {
+    this.data = data;
+    this.data.currentTaskIndex = index;
+
+    await this.saveData(this.data);
+
+    return this.getTask(index);
+  }
+
+  public async restartTask(index: number = this.data.currentTaskIndex): Promise<CommandTask<T>> {
+    this.data.currentTaskIndex = index;
+
+    await this.saveData(this.data);
+
+    return this.getTask(index);
+  }
+
+  public async stopTasks(): Promise<CommandTask<T>> {
+    if (this.data.isRunning) {
+      this.data.isRunning = false;
+
+      await this.saveData(this.data);
+    }
+
+    return new CommandTask<T>(this, "stop");
   }
 
   public async sendMessage(message: string | rompot.IMessage): Promise<rompot.IMessage> {
@@ -171,87 +168,95 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       return await this.client.send(message);
     } else {
-      return await this.client.sendMessage(this.data.chatId, message);
+      return await this.client.sendMessage(this.data.lastMessage.chat, message);
     }
   }
 
-  public waitForMessage(task: (data: T, message: rompot.IMessage, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
-    const fn = async (data: T, next: CommandNext<T>, restart: CommandRestart<T>): Promise<ReturnType<CommandNext<T>>> => {
+  public waitForMessage(fn: (data: T, message: rompot.IMessage, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>): CommandTask<T> {
+    const task = new CommandTask(this, "function");
+
+    task.setFunction(async (command, data, next, restart) => {
       const waitForMessageConfig = { stopRead: true, ignoreMessageFromMe: false };
 
-      const lastMessage = await this.client.awaitMessage(data.lastMessage.chat.id, waitForMessageConfig);
+      const lastMessage = await command.client.awaitMessage(data.chatId, waitForMessageConfig);
 
-      if (lastMessage.apiSend) return fn(data, next, restart);
+      if (lastMessage.apiSend) return task.execFunction(data, next, restart);
 
-      return await task(data, lastMessage, next, restart);
-    };
+      return await fn(data, lastMessage, next, restart);
+    });
 
-    return fn;
+    return task;
   }
 
-  public waitForText(task: (data: T, text: string | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
-    return this.waitForMessage(async (data: T, message: rompot.IMessage, next: CommandNext<T>, restart: CommandRestart<T>) => {
+  public waitForText(fn: (data: T, text: string | null, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>): CommandTask<T> {
+    const task = this.waitForMessage(async (data, message, next, restart) => {
       if (!message.text) {
-        await this.sendMessage("Favor digite um texto válido:");
+        await task.command.sendMessage("Favor digite um texto válido:");
 
-        return this.waitForText(task)(data, next, restart);
+        return task.execFunction(data, next, restart);
       }
 
       if (TextUtils.isCanceled(message.text)) {
-        return await task(data, null, next, restart);
+        return await fn(data, null, next, restart);
       }
 
-      return await task(data, message.text, next, restart);
+      return await fn(data, message.text, next, restart);
     });
+
+    return task;
   }
 
-  public waitForNumber(task: (data: T, number: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>, allNumbers: boolean = false): CommandTask<T> {
-    return this.waitForText(async (data, text, next, restart) => {
+  public waitForNumber(fn: (data: T, number: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>, allNumbers: boolean = false): CommandTask<T> {
+    const task = this.waitForText(async (data, text, next, restart) => {
       if (text == null) {
-        return await task(data, null, next, restart);
+        return await fn(data, null, next, restart);
       }
 
       const num = Number(text.replace(/\D+/g, ""));
 
       if (Number.isNaN(num)) {
-        await this.sendMessage("Favor digite um número válido:");
+        await task.command.sendMessage("Favor digite um número válido:");
 
-        return this.waitForNumber(task)(data, next, restart);
+        return task.execFunction(data, next, restart);
       }
 
       if (allNumbers && num < 0) {
-        await this.sendMessage("Favor digite um número maior que zero:");
+        await task.command.sendMessage("Favor digite um número maior que zero:");
 
-        return this.waitForNumber(task)(data, next, restart);
+        return task.execFunction(data, next, restart);
       }
 
-      return await task(data, num, next, restart);
+      return await fn(data, num, next, restart);
     });
+
+    return task;
   }
 
-  public waitForPhonenumber(task: (data: T, phonenumber: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>): CommandTask<T> {
-    return this.waitForNumber(async (data, num, next, restart) => {
+  public waitForPhonenumber(fn: (data: T, phonenumber: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>): CommandTask<T> {
+    const task = this.waitForNumber(async (data, num, next, restart) => {
       if (num == null) {
-        return await task(data, null, next, restart);
+        return await fn(data, null, next, restart);
       }
 
       if (String(num).length < 8 || String(num).length > 15) {
-        await this.sendMessage("Favor digite um número no formato internacional (Ex: +55 15 12345-9999):");
+        await task.command.sendMessage("Favor digite um número no formato internacional (Ex: +55 15 12345-9999):");
 
-        return this.waitForPhonenumber(task)(data, next, restart);
+        return task.execFunction(data, next, restart);
       }
 
-      return await task(data, num, next, restart);
+      return await fn(data, num, next, restart);
     });
+
+    return task;
   }
 
   public waitForOption(
     options: Array<any> | CommandDataKey<T>,
-    task: (data: T, option: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => ReturnType<CommandTask<T>>
+    fn: (data: T, option: number | null, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>
   ): CommandTask<T> {
-    return this.waitForText(async (data, text, next, restart) => {
+    const task = this.waitForText(async (data, text, next, restart) => {
       if (text == null) {
-        return await task(data, null, next, restart);
+        return await fn(data, null, next, restart);
       }
 
       options = CommandDataUtils.getValue<T, any[]>(data, options);
@@ -267,18 +272,20 @@ export default class Command<T extends CommandData> extends rompot.Command {
           index = Number(i);
         }
 
-        return await task(data, result[index], next, restart);
+        return await fn(data, result[index], next, restart);
       }
 
       const option = Number(text.replace(/\D+/g, ""));
 
       if (Number.isNaN(option) || option < 1 || option > options.length) {
-        await this.sendMessage("Favor digite o número de uma das opções:");
+        await task.command.sendMessage("Favor digite o número de uma das opções:");
 
-        return this.waitForOption(options, task)(data, next, restart);
+        return task.execFunction(data, next, restart);
       }
 
-      return await task(data, Number(option.toFixed(0)) - 1, next, restart);
+      return await fn(data, Number(option.toFixed(0)) - 1, next, restart);
     });
+
+    return task;
   }
 }
