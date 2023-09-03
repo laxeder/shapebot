@@ -4,8 +4,10 @@ import type { CommandNext } from "@modules/command/types/CommandNext";
 
 import * as rompot from "rompot";
 
+import CommandDataController from "@modules/command/controllers/CommandDataController";
 import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
 import CommandDataKey from "@modules/command/models/CommandDataKey";
+import DatabaseUtils from "@modules/database/utils/DatabaseUtils";
 import CommandData from "@modules/command/models/CommandData";
 import CommandTask from "@modules/command/models/CommandTask";
 import ClientError from "@modules/error/models/ClientError";
@@ -172,6 +174,52 @@ export default class Command<T extends CommandData> extends rompot.Command {
     }
   }
 
+  public runCommand<C extends CommandData>(
+    commandId: string | CommandDataKey<T>,
+    fn: (data: T, isSearched: boolean, isExecuted: boolean, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>
+  ): CommandTask<T> {
+    const task = new CommandTask(this, "function");
+
+    task.setFunction(async (command, data, next, restart) => {
+      const cmdId = CommandDataUtils.getValue<T, string>(data, commandId);
+
+      const runCMD = command.client.searchCommand(cmdId);
+
+      if (runCMD == null || !(runCMD instanceof Command)) {
+        return await fn(data, false, false, next, restart);
+      }
+
+      const permission = await runCMD.checkPerms(data.lastMessage);
+
+      if (permission != null && !permission.isPermited) {
+        command.client.commandController.emit("no-allowed", { message: data.lastMessage, command: runCMD, permission });
+
+        return await fn(data, true, false, next, restart);
+      }
+
+      await command.onRead();
+
+      const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
+
+      runCMD.setSaveData(commandDataController.saveData.bind(commandDataController));
+      runCMD.setRestoreData(commandDataController.restoreData.bind(commandDataController)<C>);
+
+      const cmdData = injectJSON(runCMD, new Command(CommandDataUtils.generateEmpty({})), true);
+
+      cmdData.client = command.client;
+      cmdData.data.isHead = false;
+      cmdData.data.lastMessage = data.lastMessage;
+      cmdData.data.botId = data.botId;
+      cmdData.data.chatId = data.chatId;
+
+      await command.client.commandController.execCommand(data.lastMessage, cmdData);
+
+      return await fn(data, true, true, next, restart);
+    });
+
+    return task;
+  }
+
   public waitForMessage(fn: (data: T, message: rompot.IMessage, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>): CommandTask<T> {
     const task = new CommandTask(this, "function");
 
@@ -259,9 +307,9 @@ export default class Command<T extends CommandData> extends rompot.Command {
         return await fn(data, null, next, restart);
       }
 
-      options = CommandDataUtils.getValue<T, any[]>(data, options);
+      const opts = CommandDataUtils.getValue<T, any[]>(data, options);
 
-      const result = options.filter((opt) => text.toLowerCase().includes(String(opt).toLowerCase()));
+      const result = opts.filter((opt) => text.toLowerCase().includes(String(opt).toLowerCase()));
 
       if (result.length > 0) {
         let index = 0;
@@ -277,7 +325,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       const option = Number(text.replace(/\D+/g, ""));
 
-      if (Number.isNaN(option) || option < 1 || option > options.length) {
+      if (Number.isNaN(option) || option < 1 || option > opts.length) {
         await task.command.sendMessage("Favor digite o número de uma das opções:");
 
         return task.execFunction(data, next, restart);

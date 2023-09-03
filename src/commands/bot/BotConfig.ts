@@ -4,7 +4,6 @@ import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
 import RepositoryUtils from "@modules/database/utils/RepositoryUtils";
 import BotController from "@modules/bot/controllers/BotController";
 import { DataStatus } from "@modules/database/shared/DataStatus";
-import MarshalCMD from "@modules/command/models/MarshalCMD";
 import ClientError from "@modules/error/models/ClientError";
 import Command from "@modules/command/models/Command";
 import Bot from "@modules/bot/models/Bot";
@@ -27,7 +26,7 @@ const CommandsOption: Record<ConfigOption, string> = {
   [ConfigOption.DevChats]: "bot-dev-chats-config",
 };
 
-export const cmd = new Command(CommandDataUtils.generateEmpty({ botData: new Bot({}), options: Object.values(ConfigOption) }));
+export const cmd = new Command(CommandDataUtils.generateEmpty({ botData: new Bot({}), options: Object.values(ConfigOption), option: "" }));
 
 cmd.id = "bot-config";
 cmd.permissions = [Requeriments.BotAdmin];
@@ -61,7 +60,7 @@ cmd.addTask(async (data, next) => {
     .add(TextUtils.lineDecorator())
     .addLine(TextUtils.generateOptions(data.options))
     .addLine()
-    .addLine(`Digite a opção que voce deseja desejada ou *sair*:`);
+    .addLine(`Digite a opção que voce deseja ou *sair*:`);
 
   await cmd.sendMessage(textUtils.getText());
 
@@ -71,20 +70,26 @@ cmd.addTask(async (data, next) => {
 //! ===== Etapa 3: Obtendo opção escolhida =====
 
 cmd.addTask(
-  cmd.waitForOption(cmd.getDataValue("options"), async (data, option, next, restart) => {
+  cmd.waitForOption(cmd.getDataValue("options"), async (data, option, next) => {
     if (option == null) {
       await cmd.sendMessage("A configuração do bot foi fechada ✅");
 
       return cmd.stopTasks();
     }
 
-    const command = cmd.client.searchCommand(MarshalCMD.gen("change-bot-name"));
+    data.option = CommandsOption[data.options[option]];
 
-    if (!command) {
-      throw new ClientError(`Command "${CommandsOption[data.options[option]]}" not found`, "Esse comando está indisponível no momento");
+    return next(data);
+  })
+);
+
+//! ===== Etapa 4: Executando o comando da opção escolhida =====
+
+cmd.addTask(
+  cmd.runCommand(cmd.getDataValue("option"), async (data, isSearched, isExecuted, next, restart) => {
+    if (!isSearched) {
+      throw new ClientError(`Command "${data.option}" not found`, "Esse comando está indisponível no momento");
     }
-
-    await cmd.client.runCommand(command, data.lastMessage);
 
     await cmd.sendMessage("Voltando para a configuração do bot...");
 
