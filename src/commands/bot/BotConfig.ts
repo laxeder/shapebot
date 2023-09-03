@@ -49,7 +49,7 @@ cmd.addTask(async (data, next) => {
   return next(data);
 });
 
-//! ===== Etapa 2: Enviando dados do bote opções de configuração disponíveis =====
+//! ===== Etapa 2: Enviando dados do bot e opções de configuração disponíveis =====
 
 cmd.addTask(async (data, next) => {
   const textUtils = new TextUtils(TextUtils.bold("Configuração do bot"))
