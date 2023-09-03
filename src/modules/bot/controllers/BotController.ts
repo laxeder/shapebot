@@ -181,7 +181,7 @@ export default class BotController {
 
         for (const data of datas) {
           try {
-            if (!data.isRunning) continue;
+            if (!data.isRunning || !data.isHead) continue;
 
             client.runCommand(command, data.lastMessage);
           } catch (err) {

@@ -6,6 +6,7 @@ export default interface CommandData extends DataModel {
   botId: string;
   chatId: string;
   isRunning: boolean;
+  isHead: boolean;
   lastMessage: IMessage;
   currentTaskIndex: number;
 }
