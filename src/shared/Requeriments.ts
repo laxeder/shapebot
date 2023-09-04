@@ -22,7 +22,7 @@ export enum Requeriments {
 
 const reqChecks: RequerimentsCheks = {
   async [Requeriments.BotAdmin](botData: Bot, message: IMessage) {
-    return botData.admins.includes(message.user.id);
+    return botData.admins.includes(String(message.user.id));
   },
 
   async [Requeriments.ChatAdmin](botData: Bot, message: IMessage) {
@@ -44,7 +44,7 @@ export async function checkRequeriments(message: IMessage, ...requeriments: Requ
   return new Promise<ICommandPermission>(async (resolve, reject) => {
     const botController = new BotController(RepositoryUtils.getBotRepository());
 
-    const botData = await botController.getBotById(message.clientId);
+    const botData = await botController.getBotById(message.client.id);
 
     var isPermited: boolean = true;
 
