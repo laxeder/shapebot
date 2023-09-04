@@ -215,13 +215,24 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       const cmdData = injectJSON(runCMD, new Command(CommandDataUtils.generateEmpty({})), true);
 
-      cmdData.client = command.client;
+      cmdData.client = task.command.client;
+      cmdData.clientId = task.command.clientId;
+      cmdData.data.chatId = task.command.data.chatId;
+
+      const restore = await cmdData.restoreData(cmdData.data);
+
+      if (!restore.isRunning) {
+        cmdData.data = injectJSON(restore, cmdData.data);
+      }
+
       cmdData.data.isHead = false;
       cmdData.data.lastMessage = data.lastMessage;
-      cmdData.data.botId = data.botId;
-      cmdData.data.chatId = data.chatId;
+      cmdData.data.lastMessage.client = task.command.client;
+      cmdData.data.lastMessage.clientId = task.command.clientId;
 
-      await command.client.commandController.execCommand(data.lastMessage, cmdData);
+      await cmdData.saveData(cmdData.data);
+
+      await command.client.commandController.execCommand(cmdData.data.lastMessage, cmdData);
 
       return await fn(data, true, true, next, restart);
     });
@@ -238,6 +249,10 @@ export default class Command<T extends CommandData> extends rompot.Command {
       const lastMessage = await command.client.awaitMessage(data.chatId, waitForMessageConfig);
 
       if (lastMessage.apiSend) return task.execFunction(data, next, restart);
+
+      data.lastMessage = lastMessage;
+
+      await this.saveData(data);
 
       return await fn(data, lastMessage, next, restart);
     });
