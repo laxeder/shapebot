@@ -73,6 +73,40 @@ export default class BotController {
   }
 
   /**
+   * Adiciona novos chats de desenvolvedor há um bot existente.
+   * @param id - Id do bot que será atualizado.
+   * @param devChats - Os novos chats de desenvolvedor do bot.
+   * @throws ClientError se o bot não estiver habilitado.
+   */
+  public async addBotDevChats(id: string, ...devChats: string[]): Promise<void> {
+    const botData = await this.repo.read(new Bot({ id }));
+
+    const newDevChats: string[] = [...botData.devChats];
+
+    for (const devChat of devChats) {
+      if (newDevChats.includes(devChat)) return;
+
+      newDevChats.push(devChat);
+    }
+
+    await this.repo.update({ devChats: newDevChats, id });
+  }
+
+  /**
+   * Remove os chats de desenvolvedor de um bot existente.
+   * @param id - Id do bot que será atualizado.
+   * @param admins - Os chats de desenvolvedor que serão removidos do bot.
+   * @throws ClientError se o bot não estiver habilitado.
+   */
+  public async removeBotDevChats(id: string, ...devChats: string[]): Promise<void> {
+    const botData = await this.repo.read(new Bot({ id }));
+
+    const newDevChats: string[] = botData.devChats.filter((devChat) => !devChats.includes(devChat));
+
+    await this.repo.update({ devChats: newDevChats, id });
+  }
+
+  /**
    * Obtém um bot pelo seu ID
    * @param id - O ID do bot a ser obtido.
    * @returns O bot obtido.
