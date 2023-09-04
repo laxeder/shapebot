@@ -12,7 +12,7 @@ import { Requeriments } from "@shared/Requeriments";
 export const cmd = new Command(CommandDataUtils.generateEmpty({ devChatId: "" }));
 
 cmd.id = "add-bot-dev-chat";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("adicion", "dev", "chat", "bot")];
 
 //! ===== Etapa 1: Inicialização =====

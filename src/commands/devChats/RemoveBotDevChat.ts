@@ -13,7 +13,7 @@ import TextUtils from "@utils/TextUtils";
 export const cmd = new Command(CommandDataUtils.generateEmpty({ devChats: [] as string[], devChatId: "" }));
 
 cmd.id = "remove-bot-dev-chat";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("remov", "dev", "chat")];
 
 //! ===== Etapa 1: Obtendo os chats de desenvolvedor do bot =====

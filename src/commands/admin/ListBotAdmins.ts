@@ -14,7 +14,7 @@ import TextUtils from "@utils/TextUtils";
 export const cmd = new Command(CommandDataUtils.generateEmpty({ admins: [] as string[] }));
 
 cmd.id = "list-bot-admins";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("admins"), CMDKey("administradores")];
 
 //! ===== Etapa 1: Obtendo os administradores do bot =====

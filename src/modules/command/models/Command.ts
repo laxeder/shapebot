@@ -12,6 +12,7 @@ import CommandData from "@modules/command/models/CommandData";
 import CommandTask from "@modules/command/models/CommandTask";
 import ClientError from "@modules/error/models/ClientError";
 
+import { Requeriments, checkRequeriments } from "@shared/Requeriments";
 import Logger from "@shared/Logger";
 
 import { injectJSON } from "@utils/JSON";
@@ -20,6 +21,7 @@ import TextUtils from "@utils/TextUtils";
 export default class Command<T extends CommandData> extends rompot.Command {
   public id: string = "";
   public avaible: rompot.ChatType[] = ["pv"];
+  public requeriments: Requeriments[] = [];
   public tasks: CommandTask<T>[] = [];
   public data: T;
 
@@ -81,6 +83,10 @@ export default class Command<T extends CommandData> extends rompot.Command {
     await this.startTasks(message);
   }
 
+  public async checkPerms(message: rompot.IMessage): Promise<rompot.ICommandPermission | null> {
+    return await checkRequeriments(message, ...this.requeriments);
+  }
+
   public addTask(fn: ((data: T, next: CommandNext<T>, restart: CommandRestart<T>) => CommandAwaitable<CommandTask<T>>) | CommandTask<T>): void {
     if (fn instanceof CommandTask) {
       this.tasks.push(fn);
@@ -115,6 +121,9 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       await this.saveData(this.data);
     }
+
+    this.data.lastMessage.client = this.client;
+    this.data.lastMessage.clientId = this.client.id;
 
     await this.initTask(this.getTask(this.data.currentTaskIndex));
   }

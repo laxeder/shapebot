@@ -25,7 +25,7 @@ const CommandsOption: Record<ConfigOption, string> = {
 export const cmd = new Command(CommandDataUtils.generateEmpty({ options: Object.values(ConfigOption), option: "" }));
 
 cmd.id = "bot-dev-chats-config";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("config", "dev", "chat", "bot")];
 
 //! ===== Etapa 1: Enviando opções de configuração disponíveis =====

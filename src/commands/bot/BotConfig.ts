@@ -29,7 +29,7 @@ const CommandsOption: Record<ConfigOption, string> = {
 export const cmd = new Command(CommandDataUtils.generateEmpty({ botData: new Bot({}), options: Object.values(ConfigOption), option: "" }));
 
 cmd.id = "bot-config";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("config", "bot"), CMDKey("dados", "bot")];
 
 //! ===== Etapa 1: Obtendo dados do bot =====

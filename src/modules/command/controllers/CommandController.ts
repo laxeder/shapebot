@@ -89,22 +89,31 @@ export default class CommandController extends rompot.CommandController {
   }
 
   public async runCommand(command: rompot.ICommand, message: rompot.IMessage, type?: string | undefined): Promise<any> {
-    const permission = await command.checkPerms(message);
-
-    if (permission != null && !permission.isPermited) {
-      this.emit("no-allowed", { message, command, permission });
-
-      return false;
-    }
-
     if (!(command instanceof Command)) return false;
-
-    await command.onRead();
 
     const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
 
     command.setSaveData(commandDataController.saveData.bind(commandDataController));
     command.setRestoreData(commandDataController.restoreData.bind(commandDataController));
+
+    message.client = this.client;
+    message.clientId = this.client.id;
+
+    await command.onRead();
+
+    const permission = await command.checkPerms(message);
+
+    if (permission != null && !permission.isPermited) {
+      this.emit("no-allowed", { message, command, permission });
+
+      command.data.chatId = message.chat.id;
+
+      command.data = await command.restoreData(command.data);
+
+      command.initTask(await command.stopTasks());
+
+      return false;
+    }
 
     const cmd = injectJSON(command, new Command(CommandDataUtils.generateEmpty({})), true);
 

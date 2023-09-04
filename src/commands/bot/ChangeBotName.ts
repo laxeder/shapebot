@@ -12,7 +12,7 @@ import { Requeriments } from "@shared/Requeriments";
 export const cmd = new Command(CommandDataUtils.generateEmpty({ name: "" }));
 
 cmd.id = "change-bot-name";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("alter", "nome", "bot"), CMDKey("defin", "nome", "bot")];
 
 //! ===== Etapa 1: Inicialização =====

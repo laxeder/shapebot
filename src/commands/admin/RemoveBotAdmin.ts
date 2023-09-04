@@ -13,7 +13,7 @@ import TextUtils from "@utils/TextUtils";
 export const cmd = new Command(CommandDataUtils.generateEmpty({ admins: [] as string[], phonenumber: "" }));
 
 cmd.id = "remove-bot-admin";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("remov", "admin")];
 
 //! ===== Etapa 1: Obtendo os administradores do bot =====

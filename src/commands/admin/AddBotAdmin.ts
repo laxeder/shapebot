@@ -12,7 +12,7 @@ import { Requeriments } from "@shared/Requeriments";
 export const cmd = new Command(CommandDataUtils.generateEmpty({ phonenumber: 0 }));
 
 cmd.id = "add-bot-admin";
-cmd.permissions = [Requeriments.BotAdmin];
+cmd.requeriments = [Requeriments.BotAdmin];
 cmd.keys = [CMDKey("adicion", "admin")];
 
 //! ===== Etapa 1: Inicialização =====
