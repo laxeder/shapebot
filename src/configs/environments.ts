@@ -49,19 +49,3 @@ export function getShutdown(): string {
   const SHUTDOWN = getEnvironment() == "production" ? process.env.SHUTDOWN : process.env.DEV_SHUTDOWN;
   return SHUTDOWN || "1s";
 }
-
-/**
- * @returns Retorna o IP do RedisDB
- */
-export function getRedisIP(): string {
-  const RedisIP = getEnvironment() == "production" ? process.env.REDIS_IP : process.env.REDIS_IP_DEV;
-  return RedisIP || "";
-}
-
-/**
- * @returns Retorna o PORT do RedisDB
- */
-export function getRedisPORT(): string {
-  const RedisPORT = getEnvironment() == "production" ? process.env.REDIS_PORT : process.env.REDIS_PORT_DEV;
-  return RedisPORT || "";
-}
