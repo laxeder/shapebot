@@ -107,6 +107,40 @@ export default class BotController {
   }
 
   /**
+   * Adiciona novos atendentes há um bot existente.
+   * @param id - Id do bot que será atualizado.
+   * @param attendants - Os novos atendentes do bot.
+   * @throws ClientError se o bot não estiver habilitado.
+   */
+  public async addBotAttendants(id: string, ...attendants: string[]): Promise<void> {
+    const botData = await this.repo.read(new Bot({ id }));
+
+    const newAttendants: string[] = [...botData.attendants];
+
+    for (const attendant of attendants) {
+      if (attendants.includes(attendant)) return;
+
+      attendants.push(attendant);
+    }
+
+    await this.repo.update({ attendants: newAttendants, id });
+  }
+
+  /**
+   * Remove os atendentes de um bot existente.
+   * @param id - Id do bot que será atualizado.
+   * @param attendants - Os atendentes que serão removidos do bot.
+   * @throws ClientError se o bot não estiver habilitado.
+   */
+  public async removeBotAttendants(id: string, ...attendants: string[]): Promise<void> {
+    const botData = await this.repo.read(new Bot({ id }));
+
+    const newAttendants: string[] = botData.attendants.filter((attendant) => !attendants.includes(attendant));
+
+    await this.repo.update({ attendants: newAttendants, id });
+  }
+
+  /**
    * Obtém um bot pelo seu ID
    * @param id - O ID do bot a ser obtido.
    * @returns O bot obtido.
