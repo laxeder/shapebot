@@ -5,7 +5,7 @@ import DataModel from "@modules/database/models/DataModel";
 import ClientError from "@modules/error/models/ClientError";
 import User from "@modules/user/models/User";
 
-import DateUtils from "@utils/Date";
+import DateUtils from "@utils/DateUtils";
 
 export default class UserRepository implements DataRepository<User> {
   constructor(private db: Database) {}

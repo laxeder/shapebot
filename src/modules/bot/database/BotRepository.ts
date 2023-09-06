@@ -5,7 +5,7 @@ import DataModel from "@modules/database/models/DataModel";
 import ClientError from "@modules/error/models/ClientError";
 import Bot from "@modules/bot/models/Bot";
 
-import DateUtils from "@utils/Date";
+import DateUtils from "@utils/DateUtils";
 
 export default class BotRepository implements DataRepository<Bot> {
   constructor(private db: Database) {}
