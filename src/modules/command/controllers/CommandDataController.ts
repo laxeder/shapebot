@@ -5,7 +5,6 @@ import { DataStatus } from "@modules/database/shared/DataStatus";
 import CommandData from "@modules/command/models/CommandData";
 import Database from "@modules/database/interfaces/Database";
 import ClientError from "@modules/error/models/ClientError";
-import DataModel from "@modules/database/models/DataModel";
 
 import { injectJSON } from "@utils/JSON";
 import DateUtils from "@utils/Date";
@@ -54,20 +53,9 @@ export default class CommandDataController {
       throw new ClientError("Command chat id not declared", "Não foi possível salvar os dados do comando");
     }
 
-    const commandData = await this.db.get(`/commands/${data.botId}/${data.id}/save`, data.chatId);
+    const commandData = (await this.db.get(`/commands/${data.botId}/${data.id}/save`, data.chatId)) as T;
 
-    const newData = CommandDataUtils.generateEmpty(commandData) as T;
-
-    newData.id = data.id;
-    newData.botId = data.botId;
-    newData.chatId = data.chatId;
-    newData.lastMessage = injectJSON(newData.lastMessage, new Message("", ""));
-
-    if (!newData.isRunning || newData.status != DataStatus.Enabled) {
-      newData.updatedAt = DateUtils.ISO();
-      newData.createdAt = DateUtils.ISO();
-      newData.status = DataStatus.Enabled;
-    }
+    const newData = this.readCommandData<T>(data, commandData);
 
     return newData;
   }
@@ -88,14 +76,28 @@ export default class CommandDataController {
 
     const allChatsData: CommandData[] = [];
 
-    const datas = await this.db.findAll(`/commands/${data.botId}/${data.id}/save`);
+    const datas = (await this.db.findAll(`/commands/${data.botId}/${data.id}/save`)) as CommandData[];
 
     for (const commandData of datas) {
-      const newData = DataModel.inject(CommandDataUtils.generateEmpty(data), commandData, true);
+      const newData = this.readCommandData(data, commandData);
 
       allChatsData.push(newData);
     }
 
     return allChatsData;
+  }
+
+  private readCommandData<T extends CommandData>(originalData: Partial<T>, commandData: T): T {
+    const newData = CommandDataUtils.generateEmpty(commandData.isRunning ? { ...originalData, ...commandData } : originalData) as T;
+
+    newData.lastMessage = injectJSON(newData.lastMessage, new Message("", ""));
+
+    if (!newData.isRunning || newData.status != DataStatus.Enabled) {
+      newData.updatedAt = DateUtils.ISO();
+      newData.createdAt = DateUtils.ISO();
+      newData.status = DataStatus.Enabled;
+    }
+
+    return newData;
   }
 }
