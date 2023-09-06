@@ -35,7 +35,7 @@ export default class CroxyDB implements Database {
   public async get(key: string, id: string): Promise<DataModel> {
     const data = await this.db.get(this.formateKey(key, id));
 
-    return DataModel.inject(new DataModel(), data, true);
+    return DataModel.inject(new DataModel(id), data, true);
   }
 
   public async save(key: string, data: DataModel, useDataId: boolean = true): Promise<void> {

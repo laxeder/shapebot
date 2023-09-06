@@ -10,6 +10,10 @@ export default class DataModel implements IDataModel {
   public createdAt: string = "";
   public updatedAt: string = "";
 
+  constructor(id: string = "") {
+    this.id = id;
+  }
+
   /**
    * Substitui as propriedades dos dados existente por novos dados.
    * @param oldData - Os dados existente.
