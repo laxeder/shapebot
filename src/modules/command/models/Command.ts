@@ -254,6 +254,8 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       if (lastMessage.apiSend) return task.execFunction(data, next, restart);
 
+      await lastMessage.read();
+
       data.lastMessage = lastMessage;
 
       await this.saveData(data);

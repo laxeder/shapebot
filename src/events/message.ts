@@ -39,6 +39,8 @@ export default async (client: IClient, message: IMessage) => {
       //! =============== EXECUTANDO COMANDO SOLICITADO NA MENSAGEM
       //! =================================================================
 
+      await message.read();
+
       const executed = await client.runCommand(cmd, message, marshalCMD.type);
 
       if (executed || message.fromMe) return;
