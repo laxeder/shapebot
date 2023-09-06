@@ -95,7 +95,7 @@ export default class BotController {
   /**
    * Remove os chats de desenvolvedor de um bot existente.
    * @param id - Id do bot que será atualizado.
-   * @param admins - Os chats de desenvolvedor que serão removidos do bot.
+   * @param devChats - Os chats de desenvolvedor que serão removidos do bot.
    * @throws ClientError se o bot não estiver habilitado.
    */
   public async removeBotDevChats(id: string, ...devChats: string[]): Promise<void> {
