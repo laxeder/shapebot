@@ -198,7 +198,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       const runCMD = command.client.searchCommand(cmdId);
 
-      if (runCMD == null || !(runCMD instanceof Command)) {
+      if (runCMD == null || !(runCMD instanceof Command) || runCMD.id == command.id) {
         return await fn(data, false, false, next, restart);
       }
 
