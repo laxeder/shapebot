@@ -11,4 +11,20 @@ export default class Bot extends DataModel {
 
     DataModel.inject(this, data);
   }
+
+  public isAdmin(id: string) {
+    return this.admins.includes(String(id));
+  }
+
+  public isAttendant(id: string) {
+    return this.attendants.includes(String(id));
+  }
+
+  public hasAdminPermission(id: string) {
+    return this.admins.includes(String(id));
+  }
+
+  public hasAttendantPermission(id: string) {
+    return this.attendants.includes(String(id)) || this.hasAdminPermission(id);
+  }
 }
