@@ -17,8 +17,6 @@ services:
     restart: unless-stopped
     ports:
       - 9002:9002
-    depends_on:
-      - "spbt-redis"
 
   spbt-prod:
     image: spbt-prod
@@ -34,5 +32,3 @@ services:
     restart: unless-stopped
     ports:
       - 8082:8082
-    depends_on:
-      - "spbt-redis"
