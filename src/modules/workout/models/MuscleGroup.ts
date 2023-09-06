@@ -1,0 +1,16 @@
+export enum MuscleGroup {
+  Triceps = "Tríceps",
+  Biceps = "Bíceps",
+  Quadriceps = "Quadríceps",
+  Pectoralis = "Peitorais",
+  Back = "Costas",
+  Deltoids = "Deltoides",
+  Hamstrings = "Isquiotibiais",
+  Calves = "Panturrilhas",
+  Glutes = "Glúteos",
+  Abdominals = "Abdômen",
+  Trapezius = "Trapézio",
+  Latissimus = "Latíssimo do dorso",
+  Obliques = "Oblíquos",
+  Forearms = "Antebraços",
+}
