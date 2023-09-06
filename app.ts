@@ -8,10 +8,12 @@ import BotController from "@modules/bot/controllers/BotController";
 import Logger from "@shared/Logger";
 
 async function start() {
-  Logger.info(`Iniciando app...`);
-  Logger.info(`Ambiente: ${getEnvironment()}`);
+  const logger = new Logger();
 
-  Logger.info(`Iniciando bots...`);
+  logger.info(`Iniciando app...`);
+  logger.info(`Ambiente: ${getEnvironment()}`);
+
+  logger.info(`Iniciando bots...`);
 
   const botController = new BotController(RepositoryUtils.getBotRepository());
 
@@ -23,11 +25,11 @@ async function start() {
 
       await BotController.startBot(bot.id, auth);
     } catch (err) {
-      Logger.error(err, `Erro ao iniciar bot "${bot.name || bot.id}"`);
+      logger.error(err, `Erro ao iniciar bot "${bot.name || bot.id}"`);
     }
   }
 
-  Logger.info(`Bots iniciados!`);
+  logger.info(`Bots iniciados!`);
 }
 
 start();

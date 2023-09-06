@@ -205,7 +205,9 @@ export default class BotController {
    * @param auth - Método de auntenticação do bot.
    */
   public static async startBot(botId: string, auth: IAuth) {
-    Logger.info(`Iniciando bot "${botId}"..`);
+    const logger = new Logger(botId);
+
+    logger.info(`Iniciando bot "${botId}"`);
 
     //! ===== Configurando bot ===== !\\
 
@@ -253,14 +255,14 @@ export default class BotController {
 
             client.runCommand(command, data.lastMessage);
           } catch (err) {
-            Logger.error(err, `Error in restore command data "${command.clientId} - ${command.id} - ${data.chatId}"`);
+            logger.error(err, `Error in restore command data "${command.clientId} - ${command.id} - ${data.chatId}"`);
           }
         }
       } catch (err) {
-        Logger.error(err, `Error in restore command data "${command.clientId} - ${command.id}"`);
+        logger.error(err, `Error in restore command data "${command.clientId} - ${command.id}"`);
       }
     }
 
-    Logger.info(`Bot "${botId}" foi conectado com sucesso!`);
+    logger.info(`Bot "${botId}" foi conectado com sucesso!`);
   }
 }

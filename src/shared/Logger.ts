@@ -8,9 +8,9 @@ import BotController from "@modules/bot/controllers/BotController";
 import ErrorUtils from "@modules/error/utils/ErrorUtils";
 
 export default class Logger {
-  public logger: winston.Logger;
+  public winston: winston.Logger;
 
-  constructor() {
+  constructor(public botId?: string, public chatId?: string) {
     const timestampFormat = winston.format.timestamp({
       format: getEnvironment() != "production" ? "HH:MM:ss.SSS" : "YYYY-MM-DD HH:mm:ss.SSS",
     });
@@ -26,20 +26,18 @@ export default class Logger {
       transports: [new winston.transports.Console(), new winston.transports.File({ filename: "logs/error.log", level: "error" })],
     };
 
-    this.logger = winston.createLogger(loggerConfig);
+    this.winston = winston.createLogger(loggerConfig);
   }
 
-  public static async log(type: "info" | "warn" | "error", message: string) {
+  public async log(type: "info" | "warn" | "error", message: string) {
     try {
-      const logger = new Logger();
+      this.winston[type](message);
 
-      logger.logger[type](message.replace(/\n/g, "\n"));
+      if (!this.botId) return;
 
-      const clients = ClientUtils.getClients();
+      const client = ClientUtils.getClient(this.botId);
 
-      if (Object.keys(clients).length == 0) return;
-
-      const client = clients[Object.keys(clients)[0]];
+      if (client.status !== "online") return;
 
       let text = "";
 
@@ -55,30 +53,35 @@ export default class Logger {
         text = `*[ERROR]* ${message}`;
       }
 
-      if (client.status !== "online") return;
       if (!text) return;
 
       const botController = new BotController(RepositoryUtils.getBotRepository());
 
       const bot = await botController.getBotById(client.id);
 
-      if (!bot) return;
-
       for (const chat of bot.devChats) {
-        await client.sendMessage(chat, text.replace("\n", "\n"));
+        await client.sendMessage(chat, text);
       }
-    } catch (err) {}
+
+      if (this.chatId) {
+        for (const attendant of bot.attendants) {
+          await client.sendMessage(attendant, `Um erro ocorreu na conversa: "${this.chatId}"\n\n${text}`);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  public static info(...message: any[]) {
-    Logger.log("info", message.join(" "));
+  public info(...message: any[]) {
+    return this.log("info", message.join(" "));
   }
 
-  public static warn(...message: any[]) {
-    Logger.log("warn", message.join(" "));
+  public warn(...message: any[]) {
+    return this.log("warn", message.join(" "));
   }
 
-  public static error(err: any, ...message: any[]) {
-    Logger.log("error", `${message.join(" ")}. ${ErrorUtils.getStackError(err)}`);
+  public error(err: any, ...message: any[]) {
+    return this.log("error", `${message.join(" ")}\n\n${ErrorUtils.getStackError(err)}`);
   }
 }

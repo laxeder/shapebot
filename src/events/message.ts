@@ -46,7 +46,9 @@ export default async (client: IClient, message: IMessage) => {
 
     if (message.chat.type != "pv" || message.fromMe) return;
   } catch (err) {
-    Logger.error(err, `Message error (${message.selected || message.text})`);
+    const logger = new Logger(client.id, message.chat.id);
+
+    logger.error(err, `Message error (${message.selected || message.text})`);
 
     await message.addReaction("❌");
   }

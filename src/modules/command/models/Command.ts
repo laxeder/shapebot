@@ -23,6 +23,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
   public avaible: rompot.ChatType[] = ["pv"];
   public requeriments: Requeriments[] = [];
   public tasks: CommandTask<T>[] = [];
+  public logger: Logger = new Logger("");
   public data: T;
 
   //? Implementado externamente
@@ -35,7 +36,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
   public async emitError(error: any) {
     try {
-      Logger.error(error, `Command error "${this.id}" - [${this.data.currentTaskIndex}]: ${JSON.stringify(this.data, ["\n"], 2)}`);
+      this.logger.error(error, `Command error "${this.id}" - [${this.data.currentTaskIndex}]: ${JSON.stringify(this.data)}`);
 
       if (error instanceof ClientError) {
         await this.sendMessage(`${error.message}! ❌`);
@@ -47,7 +48,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       await this.stopTasks();
     } catch (err) {
-      Logger.error(err, "Command logger error", `"${this.id}"`);
+      this.logger.error(err, "Command logger error", `"${this.id}"`);
     }
   }
 
@@ -71,12 +72,15 @@ export default class Command<T extends CommandData> extends rompot.Command {
   }
 
   public async onExec(message: rompot.IMessage): Promise<void> {
+    this.logger.chatId = message.chat.id;
+
     await this.startTasks(message);
   }
 
   public async onRead() {
     this.data.id = this.id;
     this.data.botId = this.client.id;
+    this.logger.botId = this.client.id;
   }
 
   public async onReply(message: rompot.IMessage) {

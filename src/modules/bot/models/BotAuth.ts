@@ -8,9 +8,11 @@ import { len } from "@utils/JSON";
 
 export default class BotAuth implements IAuth {
   public botId: string;
+  public logger: Logger;
 
   constructor(botId: string, private db: Database) {
     this.botId = botId;
+    this.logger = new Logger(botId);
   }
 
   public genKey(botId?: string, authKey?: string): string {
@@ -30,7 +32,7 @@ export default class BotAuth implements IAuth {
 
       return data;
     } catch (err) {
-      Logger.error(err, `Erro ao obter sessão (${this.botId}/${key})`);
+      this.logger.error(err, `Erro ao obter sessão (${this.botId}/${key})`);
 
       return null;
     }
@@ -40,7 +42,7 @@ export default class BotAuth implements IAuth {
     try {
       await this.db.save(this.genKey(this.botId, key), data);
     } catch (err) {
-      Logger.error(err, `Erro ao salvar sessão (${this.botId}:${key})`);
+      this.logger.error(err, `Erro ao salvar sessão (${this.botId}:${key})`);
     }
   }
 
@@ -48,7 +50,7 @@ export default class BotAuth implements IAuth {
     try {
       await this.db.remove(this.genKey(this.botId), key);
     } catch (err) {
-      Logger.error(err, `Erro ao remover sessão (${this.botId}/${key})`);
+      this.logger.error(err, `Erro ao remover sessão (${this.botId}/${key})`);
     }
   }
 
@@ -56,7 +58,7 @@ export default class BotAuth implements IAuth {
     try {
       return Object.keys(await this.db.findAll(this.genKey(this.botId, key)));
     } catch (err) {
-      Logger.error(err, `Erro ao listar sessão (${this.botId}:${key})`);
+      this.logger.error(err, `Erro ao listar sessão (${this.botId}:${key})`);
     }
 
     return [];

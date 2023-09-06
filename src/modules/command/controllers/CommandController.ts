@@ -157,12 +157,16 @@ export default class CommandController extends rompot.CommandController {
 
               commands.push(cmd);
             } catch (err) {
-              Logger.error(err, "Verify command in path", `"${filepath}"`);
+              const logger = new Logger(this.client.id);
+
+              logger.error(err, "Verify command in path", `"${filepath}"`);
             }
           })
         );
       } catch (err) {
-        Logger.error(err, "Verify commands in path", `"${filepath}"`);
+        const logger = new Logger(this.client.id);
+
+        logger.error(err, "Verify commands in path", `"${filepath}"`);
       }
     });
 
