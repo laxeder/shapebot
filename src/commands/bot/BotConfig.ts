@@ -18,12 +18,14 @@ enum ConfigOption {
   Name = "Alterar nome",
   Admins = "Configurar admins",
   DevChats = "Configurar chats de dev",
+  Attendants = "Configurar atendentes",
 }
 
 const CommandsOption: Record<ConfigOption, string> = {
   [ConfigOption.Name]: "change-bot-name",
   [ConfigOption.Admins]: "bot-admins-config",
   [ConfigOption.DevChats]: "bot-dev-chats-config",
+  [ConfigOption.Attendants]: "bot-attendants-config",
 };
 
 export const cmd = new Command(CommandDataUtils.generateEmpty({ botData: new Bot({}), options: Object.values(ConfigOption), option: "" }));
