@@ -50,7 +50,7 @@ export default class BotController {
     const newAdmins: string[] = [...botData.admins];
 
     for (const admin of admins) {
-      if (newAdmins.includes(admin)) return;
+      if (newAdmins.includes(admin)) continue;
 
       newAdmins.push(admin);
     }
@@ -84,7 +84,7 @@ export default class BotController {
     const newDevChats: string[] = [...botData.devChats];
 
     for (const devChat of devChats) {
-      if (newDevChats.includes(devChat)) return;
+      if (newDevChats.includes(devChat)) continue;
 
       newDevChats.push(devChat);
     }
@@ -118,9 +118,9 @@ export default class BotController {
     const newAttendants: string[] = [...botData.attendants];
 
     for (const attendant of attendants) {
-      if (attendants.includes(attendant)) return;
+      if (newAttendants.includes(attendant)) continue;
 
-      attendants.push(attendant);
+      newAttendants.push(attendant);
     }
 
     await this.repo.update({ attendants: newAttendants, id });
