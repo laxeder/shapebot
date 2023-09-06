@@ -38,19 +38,25 @@ export default class CommandController extends rompot.CommandController {
       text = text.toLowerCase();
     }
 
-    const commands: { key: rompot.ICommandKey; command: rompot.ICommand }[] = [];
+    let result: { key: rompot.ICommandKey; command: Command<any> } | null = null;
 
     for (const command of this.commands) {
-      if (command instanceof Command && command.id == text) {
-        commands.push({ key: rompot.CMDKey(command.id), command });
+      if (!(command instanceof Command)) continue;
 
-        continue;
+      if (command.id == text) {
+        result = { key: rompot.CMDKey(command.id), command };
+
+        break;
       }
 
-      let resKey: null | rompot.ICommandKey = null;
-
       for (const keys of command.keys) {
-        if (resKey != null && resKey.values.join("").length > keys.values.join("").length) continue;
+        if (result != null) {
+          if (result.key.values.length > keys.values.length) continue;
+
+          if (result.key.values.length == keys.values.length) {
+            if (result.key.values.join("").length > keys.values.join("").length) continue;
+          }
+        }
 
         for (const index in keys.values) {
           const value = this.config.lowerCase ? keys.values[index].toLowerCase() : keys.values[index];
@@ -59,36 +65,15 @@ export default class CommandController extends rompot.CommandController {
 
           if (Number(index) != keys.values.length - 1) continue;
 
-          resKey = keys;
+          result = { key: keys, command };
         }
       }
-
-      if (resKey == null) continue;
-
-      commands.push({ key: resKey, command });
     }
 
-    let commandResult: { key: rompot.ICommandKey; command: rompot.ICommand } | null = null;
-
-    for (const { key, command } of commands) {
-      if (commandResult == null) {
-        commandResult = { key, command };
-        continue;
-      }
-
-      if (key.values.join("").length > commandResult.key.values.join("").length) {
-        commandResult = { key, command };
-      }
-    }
-
-    if (commandResult == null || !(commandResult.command instanceof Command)) {
-      return null;
-    }
-
-    return commandResult.command;
+    return result != null ? result.command : null;
   }
 
-  public async runCommand(command: rompot.ICommand, message: rompot.IMessage, type?: string | undefined): Promise<any> {
+  public async runCommand(command: rompot.ICommand, message: rompot.IMessage): Promise<any> {
     if (!(command instanceof Command)) return false;
 
     const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
@@ -97,7 +82,6 @@ export default class CommandController extends rompot.CommandController {
     command.setRestoreData(commandDataController.restoreData.bind(commandDataController));
 
     message.client = this.client;
-    message.clientId = this.client.id;
 
     await command.onRead();
 
@@ -118,12 +102,6 @@ export default class CommandController extends rompot.CommandController {
     const cmd = injectJSON(command, new Command(CommandDataUtils.generateEmpty({})), true);
 
     cmd.client = this.client;
-
-    if (type == rompot.CMDRunType.Reply) {
-      await this.replyCommand(message, cmd);
-
-      return true;
-    }
 
     await this.execCommand(message, cmd);
 
