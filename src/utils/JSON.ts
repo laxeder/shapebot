@@ -116,13 +116,32 @@ export function injectJSON<T extends ObjectJSON>(objectIn: ObjectJSON, objectOut
     if (Array.isArray(objectOut[keyOut]) && objectIn[keyIn].length == 0) return;
 
     if (typeof objectIn[keyIn] == "object" && typeof objectOut[keyOut] == "object" && !Array.isArray(objectOut[keyOut])) {
-      objectOut[keyOut] = injectJSON(objectIn[keyIn], objectOut[keyOut], force);
+      if (isCircular(objectOut[keyOut])) {
+        objectOut[keyOut] = objectIn[keyIn];
+      } else {
+        objectOut[keyOut] = injectJSON(objectIn[keyIn], objectOut[keyOut], force);
+      }
     } else {
       objectOut[keyOut] = objectIn[keyIn];
     }
   });
 
   return objectOut;
+}
+
+export function isCircular(obj: any, seenObjects: any[] = []): boolean {
+  if (obj === null || typeof obj !== "object") return false;
+
+  if (seenObjects.includes(obj)) return true;
+
+  for (const key in obj) {
+    if (!obj.hasOwnProperty || !obj.hasOwnProperty(key)) continue;
+    if (!isCircular(obj[key], [...seenObjects, obj])) continue;
+
+    return true;
+  }
+
+  return false;
 }
 
 /**
