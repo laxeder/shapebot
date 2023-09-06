@@ -33,9 +33,13 @@ export default class Logger {
     try {
       const logger = new Logger();
 
-      logger.logger[type](message);
+      logger.logger[type](message.replace(/\n/g, "\n"));
 
-      const client = ClientUtils.getClient(ClientUtils.getClients()[0]?.id || "");
+      const clients = ClientUtils.getClients();
+
+      if (Object.keys(clients).length == 0) return;
+
+      const client = clients[Object.keys(clients)[0]];
 
       let text = "";
 
@@ -56,15 +60,12 @@ export default class Logger {
 
       const botController = new BotController(RepositoryUtils.getBotRepository());
 
-      const bots = await botController.listAllBots();
-
-      //? Obtem o primeiro bot da lista
-      const bot = bots[0];
+      const bot = await botController.getBotById(client.id);
 
       if (!bot) return;
 
       for (const chat of bot.devChats) {
-        await client.sendMessage(chat, text);
+        await client.sendMessage(chat, text.replace("\n", "\n"));
       }
     } catch (err) {}
   }

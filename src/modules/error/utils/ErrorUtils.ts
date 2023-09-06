@@ -9,7 +9,7 @@ export default class ErrorUtils extends Error {
       err = new Error(JSON.stringify(err, ["\n"], 2));
     }
 
-    return JSON.stringify(err.name || err, ["\n"], 2);
+    return `${err.name}`;
   }
 
   /**
@@ -22,7 +22,7 @@ export default class ErrorUtils extends Error {
       err = new Error(JSON.stringify(err, ["\n"], 2));
     }
 
-    return JSON.stringify(err.message || err, ["\n"], 2);
+    return `${err.message}`;
   }
 
   /**
@@ -35,6 +35,6 @@ export default class ErrorUtils extends Error {
       err = new Error(JSON.stringify(err, ["\n"], 2));
     }
 
-    return JSON.stringify(err.stack, ["\n"], 2);
+    return `${err.stack}`;
   }
 }
