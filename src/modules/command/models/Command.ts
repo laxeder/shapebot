@@ -11,11 +11,11 @@ import DatabaseUtils from "@modules/database/utils/DatabaseUtils";
 import CommandData from "@modules/command/models/CommandData";
 import CommandTask from "@modules/command/models/CommandTask";
 import ClientError from "@modules/error/models/ClientError";
+import ObjectUtils from "@modules/object/utils/ObjectUtils";
 
 import { Requeriments, checkRequeriments } from "@shared/Requeriments";
 import Logger from "@shared/Logger";
 
-import { injectJSON } from "@utils/JSON";
 import TextUtils from "@utils/TextUtils";
 
 export default class Command<T extends CommandData> extends rompot.Command {
@@ -117,7 +117,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
     const restore = await this.restoreData(this.data);
 
     if (restore.isRunning) {
-      injectJSON(restore, this.data);
+      ObjectUtils.inject(restore, this.data);
     } else {
       this.data.lastMessage = message;
       this.data.currentTaskIndex = 0;
@@ -217,7 +217,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
       runCMD.setSaveData(commandDataController.saveData.bind(commandDataController));
       runCMD.setRestoreData(commandDataController.restoreData.bind(commandDataController)<C>);
 
-      const cmdData = injectJSON(runCMD, new Command(CommandDataUtils.generateEmpty({})), true);
+      const cmdData = ObjectUtils.inject(runCMD, new Command(CommandDataUtils.generateEmpty({})), true);
 
       cmdData.client = task.command.client;
       cmdData.clientId = task.command.clientId;
@@ -226,7 +226,7 @@ export default class Command<T extends CommandData> extends rompot.Command {
       const restore = await cmdData.restoreData(cmdData.data);
 
       if (!restore.isRunning) {
-        cmdData.data = injectJSON(restore, cmdData.data);
+        cmdData.data = ObjectUtils.inject(restore, cmdData.data);
       }
 
       cmdData.data.isHead = false;

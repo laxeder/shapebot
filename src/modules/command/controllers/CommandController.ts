@@ -3,13 +3,13 @@ import * as rompot from "rompot";
 import CommandDataController from "@modules/command/controllers/CommandDataController";
 import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
 import DatabaseUtils from "@modules/database/utils/DatabaseUtils";
+import ObjectUtils from "@modules/object/utils/ObjectUtils";
 import Command from "@modules/command/models/Command";
 
 import { Requeriments } from "@shared/Requeriments";
 import Logger from "@shared/Logger";
 
 import FileUtils from "@utils/FileUtils";
-import { injectJSON } from "@utils/JSON";
 
 export default class CommandController extends rompot.CommandController {
   constructor(config: Partial<rompot.ICommandControllerConfig> = {}) {
@@ -99,7 +99,7 @@ export default class CommandController extends rompot.CommandController {
       return false;
     }
 
-    const cmd = injectJSON(command, new Command(CommandDataUtils.generateEmpty({})), true);
+    const cmd = ObjectUtils.inject(command, new Command(CommandDataUtils.generateEmpty({})), true);
 
     cmd.client = this.client;
 

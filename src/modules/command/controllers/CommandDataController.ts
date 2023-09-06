@@ -5,6 +5,7 @@ import { DataStatus } from "@modules/database/shared/DataStatus";
 import CommandData from "@modules/command/models/CommandData";
 import Database from "@modules/database/interfaces/Database";
 import ClientError from "@modules/error/models/ClientError";
+import ObjectUtils from "@modules/object/utils/ObjectUtils";
 
 import DateUtils from "@utils/DateUtils";
 
@@ -89,7 +90,7 @@ export default class CommandDataController {
   private readCommandData<T extends CommandData>(originalData: Partial<T>, commandData: T): T {
     const newData = CommandDataUtils.generateEmpty(commandData.isRunning ? { ...originalData, ...commandData } : originalData) as T;
 
-    newData.lastMessage = injectJSON(newData.lastMessage, new Message("", ""));
+    newData.lastMessage = ObjectUtils.inject(newData.lastMessage, new Message("", ""));
 
     if (!newData.isRunning || newData.status != DataStatus.Enabled) {
       newData.updatedAt = DateUtils.ISO();

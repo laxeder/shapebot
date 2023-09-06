@@ -1,10 +1,9 @@
 import { IAuth } from "rompot";
 
+import ObjectUtils from "@modules/object/utils/ObjectUtils";
 import Database from "@modules/database/interfaces/Database";
 
 import Logger from "@shared/Logger";
-
-import { len } from "@utils/JSON";
 
 export default class BotAuth implements IAuth {
   public botId: string;
@@ -28,7 +27,7 @@ export default class BotAuth implements IAuth {
     try {
       const data = await this.db.findAll(this.genKey(this.botId, key));
 
-      if (!Array.isArray(data) && len(data) == 0) return null;
+      if (!Array.isArray(data) && ObjectUtils.len(data) == 0) return null;
 
       return data;
     } catch (err) {
