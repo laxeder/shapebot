@@ -17,6 +17,7 @@ export enum Requeriments {
   ChatAdmin = "chat-admin",
   UserAdmin = "user-admin",
   BotAdmin = "bot-admin",
+  BotAttendant = "bot-attendant",
 }
 
 const reqChecks: RequerimentsCheks = {
@@ -25,7 +26,15 @@ const reqChecks: RequerimentsCheks = {
 
     const botData = await botController.getBotById(message.client.id);
 
-    return botData.admins.includes(String(message.user.id));
+    return botData.hasAdminPermission(message.user.id);
+  },
+
+  async [Requeriments.BotAttendant](message: IMessage) {
+    const botController = new BotController(RepositoryUtils.getBotRepository());
+
+    const botData = await botController.getBotById(message.client.id);
+
+    return botData.hasAttendantPermission(message.user.id);
   },
 
   [Requeriments.ChatAdmin](message: IMessage) {
