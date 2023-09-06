@@ -42,7 +42,7 @@ cmd.addTask(async (data) => {
     .add(TextUtils.lineDecorator())
     .addLine(TextUtils.generateOptions(data.admins))
     .addLine()
-    .addLine(`Digite ${TextUtils.bold('"configurar administradores')} para configurar os administradores do bot`);
+    .addLine(`Digite ${TextUtils.bold('"configurar administradores"')} para configurar os administradores do bot`);
 
   await cmd.sendMessage(textUtils.getText());
 
