@@ -25,6 +25,8 @@ services:
     build:
       context: ./
       dockerfile: dockerfiles/Dockerfile
+    volumes:
+      - .:/build
     env_file:
       - ./.env
     environment:
