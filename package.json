@@ -8,7 +8,7 @@
     "prod": "export NODE_ENV=production && ts-node -r tsconfig-paths/register app.ts --prod",
     "stage": "export NODE_ENV=production && ts-node -r tsconfig-paths/register app.ts --prod",
     "dev": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register app.ts --dev",
-    "generate": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register generateBot.ts --dev",
+    "generate": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register src/modules/bot/models/GenerateBot.ts --dev --auto-start",
     "build": "npm run clean && tsc && tsc-alias",
     "clean": "rimraf dist"
   },
