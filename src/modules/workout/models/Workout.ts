@@ -4,6 +4,7 @@ import { MuscleGroup } from "@modules/workout/models/MuscleGroup";
 import DataModel from "@modules/database/models/DataModel";
 
 export default class Workout extends DataModel {
+  public botId: string = "";
   public name: string = "";
   public description: string = "";
   public muscles: MuscleGroup[] = [];

@@ -18,22 +18,24 @@ export default class WorkoutController {
 
   /**
    * Atualiza um exercício existente.
+   * @param botId - Id do bot que contém o exercício.
    * @param id - Id do exercício que será atualizado.
    * @param workout - Os campos atualizados do exercício.
    * @throws ClientError se o exercício não estiver habilitado.
    */
-  public async updateWorkout(id: string, workout: Partial<Workout>): Promise<void> {
-    await this.repo.update({ ...workout, id });
+  public async updateWorkout(botId: string, id: string, workout: Partial<Workout>): Promise<void> {
+    await this.repo.update({ ...workout, botId, id });
   }
 
   /**
    * Adiciona novos membros musculares há um exercício existente.
+   * @param botId - Id do bot que contém o exercício.
    * @param id - Id do exercício que será atualizado.
    * @param muscles - Os novos músculos do exercício.
    * @throws ClientError se o exercício não estiver habilitado.
    */
-  public async addWorkoutMuscles(id: string, ...muscles: MuscleGroup[]): Promise<void> {
-    const workoutData = await this.repo.read(new Workout({ id }));
+  public async addWorkoutMuscles(botId: string, id: string, ...muscles: MuscleGroup[]): Promise<void> {
+    const workoutData = await this.repo.read(new Workout({ botId, id }));
 
     const newMuscles: MuscleGroup[] = [...workoutData.muscles];
 
@@ -43,31 +45,33 @@ export default class WorkoutController {
       newMuscles.push(admin);
     }
 
-    await this.repo.update({ muscles: newMuscles, id });
+    await this.repo.update({ muscles: newMuscles, botId, id });
   }
 
   /**
    * Remove os músculos de um exercício existente.
+   * @param botId - Id do bot que contém o exercício.
    * @param id - Id do exercício que será atualizado.
    * @param muscles - Os músculos que serão removidos do exercício.
    * @throws ClientError se o exercício não estiver habilitado.
    */
-  public async removeWorkoutMuscles(id: string, ...muscles: MuscleGroup[]): Promise<void> {
-    const workoutData = await this.repo.read(new Workout({ id }));
+  public async removeWorkoutMuscles(botId: string, id: string, ...muscles: MuscleGroup[]): Promise<void> {
+    const workoutData = await this.repo.read(new Workout({ botId, id }));
 
     const newMuscles: MuscleGroup[] = workoutData.muscles.filter((muscle) => !muscles.includes(muscle));
 
-    await this.repo.update({ muscles: newMuscles, id });
+    await this.repo.update({ muscles: newMuscles, botId, id });
   }
 
   /**
    * Adiciona novas categorias há um exercício existente.
+   * @param botId - Id do bot que contém o exercício.
    * @param id - Id do exercício que será atualizado.
    * @param categories - As novas categorias do exercício.
    * @throws ClientError se o exercício não estiver habilitado.
    */
-  public async addWorkoutCategories(id: string, ...categories: WorkoutCategory[]): Promise<void> {
-    const workoutData = await this.repo.read(new Workout({ id }));
+  public async addWorkoutCategories(botId: string, id: string, ...categories: WorkoutCategory[]): Promise<void> {
+    const workoutData = await this.repo.read(new Workout({ botId, id }));
 
     const newCategories: WorkoutCategory[] = [...workoutData.categories];
 
@@ -77,40 +81,43 @@ export default class WorkoutController {
       newCategories.push(category);
     }
 
-    await this.repo.update({ categories: newCategories, id });
+    await this.repo.update({ categories: newCategories, botId, id });
   }
 
   /**
    * Remove as categorias de um exercício existente.
+   * @param botId - Id do bot que contém o exercício.
    * @param id - Id do exercício que será atualizado.
    * @param devChats - As categorias que serão removidas do exercício.
    * @throws ClientError se o exercício não estiver habilitado.
    */
-  public async removeWorkoutCategories(id: string, ...categories: WorkoutCategory[]): Promise<void> {
-    const workoutData = await this.repo.read(new Workout({ id }));
+  public async removeWorkoutCategories(botId: string, id: string, ...categories: WorkoutCategory[]): Promise<void> {
+    const workoutData = await this.repo.read(new Workout({ botId, id }));
 
     const newCategories: WorkoutCategory[] = workoutData.categories.filter((category) => !categories.includes(category));
 
-    await this.repo.update({ categories: newCategories, id });
+    await this.repo.update({ categories: newCategories, botId, id });
   }
 
   /**
    * Obtém um exercício pelo seu ID
+   * @param botId - Id do bot do exercício a ser obtido.
    * @param id - O ID do exercício a ser obtido.
    * @returns O exercício obtido.
    */
-  public async getWorkoutById(id: string): Promise<Workout> {
-    const workout = await this.repo.read(new Workout({ id }));
+  public async getWorkoutById(botId: string, id: string): Promise<Workout> {
+    const workout = await this.repo.read(new Workout({ botId, id }));
 
     return workout;
   }
 
   /**
    * Lista todos os exercícios habilitados
+   * @param botId - Id do bot que contém os exercícios
    * @returns Uma lista de exercícios habilitados.
    */
-  public async listAllWorkouts(): Promise<Workout[]> {
-    const allWorkouts = await this.repo.findAll();
+  public async listAllWorkouts(botId: string): Promise<Workout[]> {
+    const allWorkouts = await this.repo.findAll(botId);
 
     const enabledWorkouts: Workout[] = [];
 
@@ -126,17 +133,19 @@ export default class WorkoutController {
 
   /**
    * Exclui um exercício pelo seu ID.
+   * @param botId - Id do bot do exercício que será excluído.
    * @param id - O ID do exercício a ser excluído.
    */
-  public async deleteWorkoutById(id: string): Promise<void> {
-    await this.repo.delete(new Workout({ id }));
+  public async deleteWorkoutById(botId: string, id: string): Promise<void> {
+    await this.repo.delete(new Workout({ botId, id }));
   }
 
   /**
    * Restaura um exercício pelo seu ID.
+   * @param botId - Id do bot do exercício que será restuarado.
    * @param id - O ID do exercício a ser restaurado.
    */
-  public async restoreWorkoutById(id: string): Promise<void> {
-    await this.repo.restore(new Workout({ id }));
+  public async restoreWorkoutById(botId: string, id: string): Promise<void> {
+    await this.repo.restore(new Workout({ botId, id }));
   }
 }
