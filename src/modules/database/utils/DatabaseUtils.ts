@@ -1,6 +1,6 @@
+import { CroxyDBName } from "@modules/database/shared/CroxyDBName";
 import Database from "@modules/database/interfaces/Database";
 import CroxyDB from "@modules/database/models/CroxyDB";
-import { CroxyDBName } from "../shared/CroxyDBName";
 
 export default class DatabaseUtils {
   public static getCommandDatabase(): Database {
@@ -13,5 +13,9 @@ export default class DatabaseUtils {
 
   public static getUserDatabase(): Database {
     return new CroxyDB(CroxyDBName.User);
+  }
+
+  public static getWorkoutDatabase(): Database {
+    return new CroxyDB(CroxyDBName.Workout);
   }
 }
