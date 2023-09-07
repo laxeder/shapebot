@@ -1,4 +1,5 @@
 export enum WorkoutCategory {
+  Default = "Geral",
   Strength = "Força",
   Cardiovascular = "Cardiovascular",
   Flexibility = "Flexibilidade",
