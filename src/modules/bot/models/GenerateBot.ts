@@ -15,7 +15,7 @@ export default class GenerateBot {
   public $onOpen: Subject<void> = new Subject();
   public $onStop: Subject<boolean> = new Subject();
 
-  constructor(public client: IClient, public needToAlert: boolean = true) {
+  constructor(public client: IClient) {
     this.$onStop.subscribe(async () => {
       await this.client.stop();
 
