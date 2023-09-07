@@ -225,16 +225,16 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       const restore = await cmdData.restoreData(cmdData.data);
 
-      if (!restore.isRunning) {
+      if (restore.isRunning && !restore.isHead) {
         cmdData.data = ObjectUtils.inject(restore, cmdData.data);
+      } else {
+        cmdData.data.isHead = false;
+        cmdData.data.lastMessage = data.lastMessage;
+        cmdData.data.lastMessage.client = task.command.client;
+        cmdData.data.lastMessage.clientId = task.command.clientId;
+
+        await cmdData.saveData(cmdData.data);
       }
-
-      cmdData.data.isHead = false;
-      cmdData.data.lastMessage = data.lastMessage;
-      cmdData.data.lastMessage.client = task.command.client;
-      cmdData.data.lastMessage.clientId = task.command.clientId;
-
-      await cmdData.saveData(cmdData.data);
 
       await command.client.commandController.execCommand(cmdData.data.lastMessage, cmdData);
 
