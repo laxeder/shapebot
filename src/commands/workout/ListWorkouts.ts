@@ -59,8 +59,6 @@ cmd.addTask(
       return cmd.stopTasks();
     }
 
-    console.log(option, data.categories[option]);
-
     data.workouts = data.workouts.filter((workout) => {
       return workout.categories.includes(data.categories[option]);
     });
