@@ -36,6 +36,8 @@ cmd.addTask(async (data, next) => {
 //! ===== Etapa 2: Listando categorias =====
 
 cmd.addTask(async (data, next) => {
+  await cmd.sendMessage("Menu de exercícios ativado!");
+
   const textUtils = new TextUtils(TextUtils.bold("💪 Categorias de exercícios"))
     .add(TextUtils.lineDecorator())
     .addLine(TextUtils.generateOptions(Object.values(WorkoutCategory)))
