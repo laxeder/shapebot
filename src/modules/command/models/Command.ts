@@ -339,18 +339,18 @@ export default class Command<T extends CommandData> extends rompot.Command {
 
       const opts = CommandDataUtils.getValue<T, any[]>(data, options);
 
-      const result = opts.filter((opt) => text.toLowerCase().includes(String(opt).toLowerCase()));
+      const result = opts.map((opt, index) => index).filter((index) => text.toLowerCase().includes(String(opts[index]).toLowerCase()));
 
       if (result.length > 0) {
-        let index = 0;
+        let index = -1;
 
-        for (const i in result) {
-          if (String(result[i]).length <= String(result[index]).length) continue;
+        for (const i of result) {
+          if (index != -1 && String(opts[i]).length <= String(opts[index]).length) continue;
 
           index = Number(i);
         }
 
-        return await fn(data, result[index], next, restart);
+        return await fn(data, index, next, restart);
       }
 
       const option = Number(text.replace(/\D+/g, ""));
