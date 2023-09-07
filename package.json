@@ -5,9 +5,9 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "export NODE_ENV=production && node dist/app.js",
-    "prod": "export NODE_ENV=production && ts-node -r tsconfig-paths/register app.ts --prod",
-    "stage": "export NODE_ENV=production && ts-node -r tsconfig-paths/register app.ts --prod",
-    "dev": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register app.ts --dev",
+    "prod": "export NODE_ENV=production && ts-node -r tsconfig-paths/register src/app.ts --prod",
+    "stage": "export NODE_ENV=production && ts-node -r tsconfig-paths/register src/app.ts --prod",
+    "dev": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register src/app.ts --dev",
     "generate": "export NODE_ENV=development && ts-node-dev -r tsconfig-paths/register src/modules/bot/models/GenerateBot.ts --dev --auto-start",
     "build": "npm run clean && tsc && tsc-alias",
     "clean": "rimraf dist"
