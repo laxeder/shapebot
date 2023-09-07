@@ -11,7 +11,7 @@ import TextUtils from "@utils/TextUtils";
 
 //! ===== Configurando comando =====
 
-export const cmd = new Command(CommandDataUtils.generateEmpty({ workouts: [] as Workout[], categories: [] as WorkoutCategory[], category: WorkoutCategory.Other, options: [] as string[] }));
+export const cmd = new Command(CommandDataUtils.generateEmpty({ workouts: [] as Workout[], categories: [] as WorkoutCategory[], category: WorkoutCategory.Default, options: [] as string[] }));
 
 cmd.id = "list-workouts";
 cmd.keys = [CMDKey("exercícios"), CMDKey("exercicios"), CMDKey("treinos")];
