@@ -25,14 +25,19 @@ export default class GenerateBot {
 
   public async start(botId: string = `${Date.now()}`) {
     let isConnecting: boolean = false;
+    let isStoped: boolean = false;
 
     this.client.on("qr", (qr) => {
+      if (isStoped) return;
+
       if (!isConnecting) {
         this.$onQR.next(qr);
 
         isConnecting = true;
       } else {
         this.$onStop.next(false);
+
+        isStoped = true;
       }
     });
 
@@ -40,20 +45,16 @@ export default class GenerateBot {
 
     this.$onOpen.next();
 
-    const botController = new BotController(RepositoryUtils.getBotRepository());
-
-    const botData = await botController.getBotById(this.client.id);
-
-    await botController.createBot(botData);
-
     await sleep(10000);
 
     await this.client.stop();
 
+    isStoped = true;
+
     await sleep(3000);
 
     const sourceFolder = path.join(__dirname, "sessions", botId);
-    const destinationFolder = path.join(__dirname, "sessions", botData.id);
+    const destinationFolder = path.join(__dirname, "sessions", this.client.id);
 
     await this.moveFolder(sourceFolder, destinationFolder);
 
@@ -108,11 +109,17 @@ if (process.argv.includes("--auto-start")) {
   const generateBot = new GenerateBot(client);
   const logger = new Logger();
 
-  generateBot.$onOpen.subscribe(() => {
+  generateBot.$onOpen.subscribe(async () => {
     logger.botId = generateBot.client.id;
 
     logger.info(`Bot conectado com sucesso! (${generateBot.client.id})`);
     logger.info("Configurando bot...");
+
+    const botController = new BotController(RepositoryUtils.getBotRepository());
+
+    const botData = await botController.getBotById(generateBot.client.id);
+
+    await botController.createBot(botData);
   });
 
   generateBot.$onStop.subscribe((isConnected) => {
