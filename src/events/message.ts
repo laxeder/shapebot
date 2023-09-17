@@ -1,5 +1,7 @@
 import { IClient, ButtonMessage, ListMessage, ReactionMessage, PollUpdateMessage, PollMessage, IMessage } from "rompot";
 
+import CommandDataController from "@modules/command/controllers/CommandDataController";
+import DatabaseUtils from "@modules/database/utils/DatabaseUtils";
 import MarshalCMD from "@modules/command/models/MarshalCMD";
 import { CMDRun } from "@modules/command/models/CommandRun";
 import Command from "@modules/command/models/Command";
@@ -37,7 +39,18 @@ export default async (client: IClient, message: IMessage) => {
     let cmd = client.searchCommand(marshalCMD.id || marshalCMD.name);
 
     if (cmd && cmd instanceof Command) {
+      //! =================================================================
+      //! =============== VERIFICA SE O COMANDO PODE SER INICIADO
+      //! =================================================================
+
       if (!cmd.avaible.includes(message.chat.type)) return;
+
+      const commandDataController = new CommandDataController(DatabaseUtils.getCommandDatabase());
+
+      // Não inicia acaso outro comando já estiver rodando
+      const isRunning = await commandDataController.isRunningInChat(client.id, message.chat.id);
+
+      if (isRunning) return;
 
       //! =================================================================
       //! =============== EXECUTANDO COMANDO SOLICITADO NA MENSAGEM

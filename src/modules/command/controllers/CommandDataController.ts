@@ -1,4 +1,4 @@
-import { Message } from "rompot";
+import { ClientUtils, Message } from "rompot";
 
 import CommandDataUtils from "@modules/command/utils/CommandDataUtils";
 import { DataStatus } from "@modules/database/shared/DataStatus";
@@ -6,6 +6,7 @@ import CommandData from "@modules/command/models/CommandData";
 import Database from "@modules/database/interfaces/Database";
 import ClientError from "@modules/error/models/ClientError";
 import ObjectUtils from "@modules/object/utils/ObjectUtils";
+import Command from "@modules/command/models/Command";
 
 import DateUtils from "@utils/DateUtils";
 
@@ -67,11 +68,11 @@ export default class CommandDataController {
    */
   public async listAllChatsData(data: Partial<CommandData>): Promise<CommandData[]> {
     if (!data.id) {
-      throw new ClientError("Command id not declared", "Não foi possível salvar os dados do comando");
+      throw new ClientError("Command id not declared", "Não foi possível ler os dados do comando");
     }
 
     if (!data.botId) {
-      throw new ClientError("Command bot id not declared", "Não foi possível salvar os dados do comando");
+      throw new ClientError("Command bot id not declared", "Não foi possível ler os dados do comando");
     }
 
     const allChatsData: CommandData[] = [];
@@ -85,6 +86,33 @@ export default class CommandDataController {
     }
 
     return allChatsData;
+  }
+
+  /**
+   * Verifica se tem um comando rodando em um chat.
+   * @param botId - ID do bot que contem os dados dos comandos.
+   * @param chatId - ID do chat que será verificado.
+   */
+  public async isRunningInChat(botId: string, chatId: string): Promise<boolean> {
+    const client = ClientUtils.getClient(botId);
+
+    const commands = client.getCommands() as Command<any>[];
+
+    let isRunning: boolean = false;
+
+    await Promise.all(
+      commands.map(async (command) => {
+        const datas = await this.listAllChatsData(command.data);
+
+        for (const data of datas) {
+          if (data.chatId != chatId || !data.isRunning || !data.isHead) return;
+
+          isRunning = true;
+        }
+      })
+    );
+
+    return isRunning;
   }
 
   private readCommandData<T extends CommandData>(originalData: Partial<T>, commandData: T): T {
