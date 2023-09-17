@@ -59,8 +59,7 @@ cmd.addTask(async (data) => {
 
     // Gerando QR Code para autenticação do bot
     generateBot.$onQR.subscribe(async (qr) => {
-      await cmd.sendMessage("Escaneie o QR Code com o WhatsApp do bot para autenticar ele");
-      await cmd.sendMessage(new ImageMessage(data.chatId, "", imageSync(qr, { type: "png" })));
+      await cmd.sendMessage(new ImageMessage(data.chatId, "Escaneie o QR Code com o WhatsApp do bot para autenticar ele", imageSync(qr, { type: "png" })));
     });
 
     // Avisando quando o bot for conectado
