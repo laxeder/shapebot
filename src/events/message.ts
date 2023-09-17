@@ -24,6 +24,10 @@ export default async (client: IClient, message: IMessage) => {
     if (message.isDeleted) return;
     if (message.apiSend) return;
 
+    const logger = new Logger(client.id);
+
+    logger.info(`New Message [${message.type}] [${message.chat.id}]: ${message.text}`);
+
     //! =================================================================
     //! =============== LENDO COMANDOS
     //! =================================================================
